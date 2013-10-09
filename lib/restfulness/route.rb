@@ -16,6 +16,10 @@ module Restfulness
       
     end
 
+    def build_resource(request)
+      resource.new(request)
+    end
+
   end
 
 end

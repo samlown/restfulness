@@ -29,7 +29,7 @@ module Restfulness
       routes << Route.new(path, resource)
     end
 
-    def match(request)
+    def find(request)
       
     end
 

@@ -21,7 +21,7 @@ module Restfulness
       if key.is_a?(Integer)
         components[index]
       else
-        attributes[index]
+        params[index]
       end
     end
 
@@ -31,7 +31,7 @@ module Restfulness
       self.components = string.split(/\//)
       components.each do |c|
         if c.is_a?(Symbol)
-
+          
         end
       end
     end

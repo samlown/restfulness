@@ -2,7 +2,15 @@ module Restfulness
 
   # Simple, indpendent, request interface for dealing with the incoming information
   # in a request. 
+  #
+  # Currently wraps around the information provided in a Rack Request object.
   class Request
+
+    # Who does this request belong to?
+    attr_reader :app
+
+    # System environmen
+    attr_reader :env
 
     # The HTTP action being handled
     attr_accessor :action
@@ -25,19 +33,38 @@ module Restfulness
     # Parsed parameters from the body
     attr_reader :params
 
-    def initialize
+    # The resource that will be performing the action
+    attr_reader :resource
+
+
+    def initialize(app, env)
+      self.app = app
+      self.env = env
+
+      # Prepare basics
       self.action  = nil
       self.headers = {}
       self.path    = nil
       self.query   = {}
       self.body    = nil
+
+      parse_environment
     end
 
     def params
       return @params if @params
+    end
 
+    protected
+
+    def parse_environment
+      rack_req = ::Rack::Request.new(env)
+      rack_req
+    end
+
+    def parse_action(action)
+      
     end
 
   end
-
 end
