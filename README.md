@@ -122,7 +122,7 @@ An application is designed to be included in your Rails, Sinatra, or other Rack 
 ```ruby
 run Rack::URLMap.new(
   "/"       => MyRailsApp::Application,
-  "/api"    => MyAppAPI.new
+  "/api"    => MyAppAPI.new.dispatcher
 )
 ```
 

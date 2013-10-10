@@ -11,26 +11,15 @@ module Restfulness
     end
 
     def add(*args)
-      path     = []
-      resource = nil
-      args.each do |arg|
-        case arg
-        when String, Symbole
-          path << arg
-        when Class
-          resource = arg
-        end
-      end
-
-      if resource.nil?
-        raise "Route \"#{path.join('/')}\" is missing resource!" 
-      end
-
-      routes << Route.new(path, resource)
+      routes << Route.new(*args)
     end
 
-    def find(request)
-      
+    def route_for(path)
+      parts = path.split(/\//)
+      routes.each do |route|
+        return route if route.handles?(parts)
+      end
+      nil
     end
 
     protected

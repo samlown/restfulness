@@ -23,19 +23,12 @@ module Restfulness
     attr_accessor :dispatcher
 
     def intialize
-      self.dispatcher = Dispatcher.new(self)
+      self.dispatcher = Dispatchers::Rack.new(self)
     end
 
     def router
       self.class.router
     end
-  
-    # Handle the incoming rack request 
-    def call(env)
-      # Pass everything onto the dispatcher
-      dispatcher.run(env)
-    end
-
 
     class << self
 

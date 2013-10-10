@@ -1,15 +1,14 @@
 
 module Restfulness
 
+  # The Path object is provided in request objects to provide easy access
+  # to parameters included in the URI's path.
   class Path
 
-    # List of components of the path
-    attr_accessor :components
+    attr_accessor :route, :components, :params
 
-    # Are there any parameters in the path?
-    attr_accessor :params
-
-    def initialize(string)
+    def initialize(route, string)
+      self.route = route
       parse(string)
     end
 
@@ -29,9 +28,14 @@ module Restfulness
 
     def parse(string)
       self.components = string.split(/\//)
-      components.each do |c|
-        if c.is_a?(Symbol)
-          
+
+      # Make sure we have the id available when parsing
+      path = route.path + [:id]
+
+      # Parametize values that need it
+      path.each_with_index do |value, i|
+        if value.is_a?(Symbol)
+          params[value] = components[i]
         end
       end
     end

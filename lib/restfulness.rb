@@ -1,11 +1,18 @@
-require "restfulness/version"
 
-require "restfulness/api"
+require "restfulness/application"
+require "restfulness/dispatcher"
+require "restfulness/errors"
+require "restfulness/path"
 require "restfulness/request"
 require "restfulness/resource"
 require "restfulness/response"
+require "restfulness/route"
 require "restfulness/router"
+require "restfulness/statuses"
+require "restfulness/version"
+
+require "restfulness/dispatchers/rack"
 
 module Restfulness
-  # Your code goes here...
+  # Nothing to do here.
 end
