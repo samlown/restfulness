@@ -23,7 +23,7 @@ module Restfulness
     attr_accessor :dispatcher
 
     def intialize
-      self.dispatcher = Dispatcher.new
+      self.dispatcher = Dispatcher.new(self)
     end
 
     def router
@@ -32,9 +32,8 @@ module Restfulness
   
     # Handle the incoming rack request 
     def call(env)
-      # Parse request
-      request = Request.new(self, env)
-      dispatcher.run(request)
+      # Pass everything onto the dispatcher
+      dispatcher.run(env)
     end
 
 
