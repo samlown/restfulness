@@ -6,7 +6,9 @@ Because REST APIs are all about resources, not routes.
 
 Restfulness is an attempt to create a Ruby library that helps create truly REST based APIs to your services. The focus is placed on performing HTTP actions on resources via specific routes, as opposed to the current convention of assigning routes and HTTP actions to methods or blocks of code. The difference is subtle, but makes for a much more natural approach to building APIs.
 
-To try and highlight the diferences, lets have a look at a couple of examples.
+The current version is very minimal, as it only support JSON content types, and does not have more advanced commonly used HTTP features like sessions or cookies. For most APIs this should be sufficient.
+
+To try and highlight the diferences between Restfulness and other libraries, lets have a look at a couple of examples.
 
 [Grape](https://github.com/intridea/grape) is a popular library for creating APIs in a "REST-like" manor. Here is a simplified section of code from their site:
 
@@ -84,7 +86,7 @@ end
 
 ```
 
-Resources are now important. I, for one, welcome our new resource overloads. They're a clear and consise way of separating logic between different classes, and force a clear separation between individual models and collections of models.
+Resources are now important. I, for one, welcome our new resource overloads. They're a clear and consise way of separating logic between different classes, so an individual model has nothing to do with a collection of models, even if the same model may be provided in the result set.
 
 
 ## Installation
@@ -105,7 +107,7 @@ Or install it yourself as:
 
 ### Defining an Application
 
-A Restfulness application is a Rack application whose main function is to define the routes that will forward requests on a specific path to a resource. Your applications should inherit from the `Restfulness::Application` class. Here's a simple example:
+A Restfulness application is a Rack application whose main function is to define the routes that will forward requests on a specific path to a resource. Your applications inherit from the `Restfulness::Application` class. Here's a simple example:
 
 ```ruby
 class MyAppAPI < Restfulness::Application
@@ -126,9 +128,11 @@ run Rack::URLMap.new(
 )
 ```
 
+By default, Restfulness comes with a Rack compatible dispatcher, but in the future it might make sense to add others.
+
 ### Routes
 
-The aim of routes in Restfulness are to be simple. Stupid simple. These are the basic rules:
+The aim of routes in Restfulness are to be stupid simple. These are the basic rules:
 
  * Each route is an array that forms a path when joined with `/`.
  * Order is important.
@@ -136,12 +140,28 @@ The aim of routes in Restfulness are to be simple. Stupid simple. These are the 
  * Symbols match anything, and are accessible as path attributes.
  * Every route automically gets an :id parameter at the end, that may or may not be null.
 
+Lets see a few examples:
 
-### Resources are where its at
+```ruby
+routes do
+  # Simple route to access a project, access with:
+  #   * PUT /project
+  #   * GET /project/1234
+  add 'project',  ProjectResource
+
+  # Parameters are also supported.
+  # Access the project id using `request.path[:project_id]`
+  add 'project', :project_id, 'status', ProjectStatusResource
+end
+```
+
+
+
+### Resources
 
 Resources are like Controllers in a Rails project. They handle the basic HTTP actions using methods that match the same name as the action.
 
-Resources also have support for callbacks. These have similar objectives to the callbacks used in [Ruby Webmachine](https://github.com/seancribbs/webmachine-ruby) that control the flow of the application using HTTP events. The origin [Erlang Webmachine]() has a pretty awesome [state diagram on the HTTP flows](https://github.com/basho/webmachine/wiki/Diagram).
+Resources also have support for callbacks. These have similar objectives to the callbacks used in [Ruby Webmachine](https://github.com/seancribbs/webmachine-ruby) that control the flow of the application using HTTP events.
 
 
 ### Requests
@@ -153,6 +173,9 @@ Restfulness takes a slightly different, more methodical, approach to handling pa
 The following key methods are provided in a request object for dealing with parameters:
 
 ```ruby
+# A URI object
+request.uri                # #<URI::HTTPS:0x00123456789 URL:https://example.com/somepath?x=y>
+
 # Basic request path
 request.path.to_s          # '/project/123456'
 request.path               # ['project', '123456']
@@ -167,14 +190,14 @@ require.path[:project_id]  # '123456'
 require.path[2]            # 'task'
 
 # The request query
-request.query              # {:page => 1}
+request.query              # {:page => 1} - Hash with indifferent access
 request.query[:page]       # 1
 
 # Request body
 request.body               # "{'key':'value'}" - string payload
 
 # Request params
-request.params             # {:key => 'value'} - Hash with indifferent access of parsed parameters from body
+request.params             # {'key' => 'value'} - usually a JSON deserialized object
 ```
 
 
@@ -182,6 +205,7 @@ request.params             # {:key => 'value'} - Hash with indifferent access of
 
 1. Fork it
 2. Create your feature branch (`git checkout -b my-new-feature`)
-3. Commit your changes (`git commit -am 'Add some feature'`)
-4. Push to the branch (`git push origin my-new-feature`)
-5. Create new Pull Request
+3. Write your code and test the socks off it!
+4. Commit your changes (`git commit -am 'Add some feature'`)
+5. Push to the branch (`git push origin my-new-feature`)
+6. Create new Pull Request

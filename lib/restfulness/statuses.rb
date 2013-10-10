@@ -1,4 +1,11 @@
 module Restfulness
+
+  # 
+  # List of standard HTTP statuses blatently stolen from Ruby RestClient.
+  #
+  # https://github.com/rest-client/rest-client
+  #
+
   STATUSES = {
     100 => 'Continue',
     101 => 'Switching Protocols',

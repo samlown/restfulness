@@ -12,7 +12,7 @@ module Restfulness
       self.path     = []
       args.each do |arg|
         case arg
-        when Number, String, Symbol
+        when Numeric, String, Symbol
           path << arg if arg != :id
         when Class
           self.resource = arg
@@ -30,7 +30,7 @@ module Restfulness
 
     def handles?(parts)
       path.each_with_index do |slug, i|
-        if slug.is_a?(String) or slug.is_a?(Number)
+        if slug.is_a?(String) or slug.is_a?(Numeric)
           return false if parts[i] != slug.to_s
         end
       end
@@ -40,7 +40,6 @@ module Restfulness
     def build_resource(request)
       resource.new(request)
     end
-
 
   end
 

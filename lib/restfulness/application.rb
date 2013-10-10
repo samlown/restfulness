@@ -22,7 +22,7 @@ module Restfulness
 
     attr_accessor :dispatcher
 
-    def intialize
+    def initialize
       self.dispatcher = Dispatchers::Rack.new(self)
     end
 

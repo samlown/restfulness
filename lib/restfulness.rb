@@ -1,7 +1,7 @@
 
 require "restfulness/application"
 require "restfulness/dispatcher"
-require "restfulness/errors"
+require "restfulness/exceptions"
 require "restfulness/path"
 require "restfulness/request"
 require "restfulness/resource"

@@ -8,7 +8,8 @@ module Restfulness
     attr_accessor :route, :components, :params
 
     def initialize(route, string)
-      self.route = route
+      self.route  = route
+      self.params = {}
       parse(string)
     end
 
@@ -17,7 +18,7 @@ module Restfulness
     end
 
     def [](index)
-      if key.is_a?(Integer)
+      if index.is_a?(Integer)
         components[index]
       else
         params[index]
@@ -27,7 +28,7 @@ module Restfulness
     protected
 
     def parse(string)
-      self.components = string.split(/\//)
+      self.components = string.gsub(/^\/|\/$/, '').split(/\//)
 
       # Make sure we have the id available when parsing
       path = route.path + [:id]

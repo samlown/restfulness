@@ -19,7 +19,7 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_dependency "rack", "~> 1.4"
-  spec.add_dependency "active_support", ">= 3.1"
+  spec.add_dependency "activesupport", ">= 3.1"
 
   spec.add_development_dependency "bundler", "~> 1.3"
   spec.add_development_dependency "rake"
