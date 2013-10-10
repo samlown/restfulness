@@ -11,6 +11,9 @@ module Restfulness
 
     def run(env)
       request = Request.new(app, env)
+
+      response = Response.new(app, request)
+
       if request.route
         resource = build_resource(request)
 
