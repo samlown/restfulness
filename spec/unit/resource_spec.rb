@@ -122,6 +122,108 @@ describe Restfulness::Resource do
   end
 
   describe "#check_callbacks" do
+    let :resource do
+      Class.new(Restfulness::Resource) do
+        def get
+          'result'
+        end
+        def post
+          'post'
+        end
+      end
+    end
+
+    let :obj do
+      request.action = :get
+      obj = resource.new(request, response)
+    end
+
+    it "should all be good by default" do
+      expect {
+        obj.check_callbacks
+      }.to_not raise_error
+    end
+
+    it "should raise error on invalid method" do
+      obj.stub(:method_allowed?).and_return(false)
+      expect {
+        obj.check_callbacks
+      }.to raise_error(Restfulness::HTTPException, "Method Not Allowed")
+    end
+
+    it "should raise error when not exists" do
+      obj.stub(:exists?).and_return(false)
+      expect {
+        obj.check_callbacks
+      }.to raise_error(Restfulness::HTTPException, "Resource Not Found")
+    end
+
+    it "should raise error when not authorized" do
+      obj.stub(:authorized?).and_return(false)
+      expect {
+        obj.check_callbacks
+      }.to raise_error(Restfulness::HTTPException, "Unauthorized")
+    end
+
+    it "should raise error when not allowed" do
+      obj.stub(:allowed?).and_return(false)
+      expect {
+        obj.check_callbacks
+      }.to raise_error(Restfulness::HTTPException, "Forbidden")
+    end
+
+    describe "with etag" do
+      it "should raise error when equal" do
+        obj.stub(:etag).and_return('sometag')
+        request.headers[:if_none_match] = 'sometag'
+        expect {
+          obj.check_callbacks
+        }.to raise_error(Restfulness::HTTPException, "Not Modified")
+      end
+
+      it "should continue if not equal" do
+        obj.stub(:etag).and_return('sometag')
+        request.headers[:if_none_match] = 'someoldtag'
+        expect {
+          obj.check_callbacks
+        }.to_not raise_error
+      end
+    end
+
+    describe "with if modified" do
+      it "should raise error when equal" do
+        time = Time.now
+        obj.stub(:last_modified).and_return(time)
+        request.headers[:if_modified_since] = time.to_s
+        expect {
+          obj.check_callbacks
+        }.to raise_error(Restfulness::HTTPException, "Not Modified")
+      end
+
+      it "should continue if not equal" do
+        time = Time.now
+        obj.stub(:last_modified).and_return(time)
+        request.headers[:if_modified_since] = (time - 60).to_s
+        expect {
+          obj.check_callbacks
+        }.to_not raise_error
+      end
+    end
+  end
+
+  describe "#error" do
+
+    it "should raise a new exception" do
+      klass = Class.new(Restfulness::Resource) do
+        def get
+          error(418, {})
+        end
+      end
+      obj = klass.new(request, response)
+      expect {
+        obj.get
+      }.to raise_error(Restfulness::HTTPException, "I'm A Teapot")
+    end
 
   end
 

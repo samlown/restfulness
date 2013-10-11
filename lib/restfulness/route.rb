@@ -9,7 +9,7 @@ module Restfulness
     attr_accessor :resource
 
     def initialize(*args)
-      self.path     = []
+      self.path = []
       args.each do |arg|
         case arg
         when Numeric, String, Symbol
@@ -19,7 +19,7 @@ module Restfulness
         end
       end
 
-      if resource.nil?
+      if resource.nil? || !(resource < Resource)
         raise "Route error: \"#{path.join('/')}\" is missing resource!" 
       end
     end
