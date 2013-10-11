@@ -1,4 +1,9 @@
 
+require 'uri'
+require 'multi_json'
+require 'active_support/core_ext'
+require 'rack/utils'
+
 require "restfulness/application"
 require "restfulness/dispatcher"
 require "restfulness/exceptions"

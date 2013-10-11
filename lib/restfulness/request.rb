@@ -1,7 +1,3 @@
-require 'uri'
-require 'cgi'
-require 'active_support/hash_with_indifferent_access'
-
 module Restfulness
 
   # Simple, indpendent, request interface for dealing with the incoming information
@@ -35,7 +31,7 @@ module Restfulness
     attr_accessor :body
 
     def initialize(app)
-      self.app = app
+      @app = app
 
       # Prepare basics
       self.action  = nil
@@ -57,8 +53,8 @@ module Restfulness
     end
 
     def query
-      @query ||= ActiveSupport::HashWithIndifferentAccess.new(
-        CGI::parse(uri.query)
+      @query ||= HashWithIndifferentAccess.new(
+        ::Rack::Utils.parse_nested_query(uri.query)
       )
     end
 
@@ -66,9 +62,15 @@ module Restfulness
       return @params if @params || body.nil?
       case headers[:content_type]
       when 'application/json'
-        @params = JSON.parse(body)
+        @params = MultiJson.decode(body)
       else
         raise HTTPException.new(406)
+      end
+    end
+
+    [:get, :post, :put, :delete, :head, :options].each do |m|
+      define_method("#{m}?") do
+        action == m
       end
     end
 

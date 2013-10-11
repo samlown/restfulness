@@ -3,13 +3,13 @@ module Restfulness
 
   class HTTPException < ::StandardError
 
-    attr_accessor :code, :payload, :message, :headers
+    attr_accessor :code, :payload, :headers
 
-    def initialize(code, payload, opts = {})
+    def initialize(code, payload = nil, opts = {})
       @code    = code
       @payload = payload
       @headers = opts[:headers]
-      @message = opts[:message] || STATUSES[code]
+      super(opts[:message] || STATUSES[code])
     end
 
   end

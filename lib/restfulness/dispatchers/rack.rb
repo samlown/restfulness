@@ -13,6 +13,7 @@ module Restfulness
 
         # Prepare a suitable response
         response = Response.new(request)
+        response.run
 
         # No need to provide an empty response
         if response.code
@@ -23,8 +24,8 @@ module Restfulness
       rescue HTTPException => e
         [e.code, {}, e.payload]
       rescue
-        # Something unkown went wrong
-        [504, {}, "Internal server error"]
+        # Something unknown went wrong
+        [504, {}, STATUSES[504]]
       end
 
       protected
@@ -49,8 +50,10 @@ module Restfulness
           :post
         when 'PUT'
           :put
+        when 'OPTIONS'
+          :options
         else
-          raise "Invalid action!"
+          raise HTTPException.new(501)
         end
       end
 

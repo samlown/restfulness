@@ -9,10 +9,22 @@ module Restfulness
       @response = response
     end
 
+    # Options is the only HTTP method support by default
+    def options
+      response.headers['Allow'] = self.class.supported_methods.map{ |m|
+        m.to_s.upcase
+      }.join(', ') 
+      nil
+    end
+
+    def call
+      send(request.action)
+    end
+
     # Callbacks
 
     def method_allowed?
-      self.class.supported_actions.include?(request.action)
+      self.class.supported_methods.include?(request.action)
     end
 
     def exists?
@@ -38,9 +50,9 @@ module Restfulness
     def check_callbacks
       # Access control
       raise HTTPException.new(405) unless method_allowed?
-      raise HTTPException.new(401) unless resource.authorized?
-      raise HTTPException.new(403) unless resource.allowed?
-      raise HTTPException.new(404) unless resource.exists?
+      raise HTTPException.new(401) unless authorized?
+      raise HTTPException.new(403) unless allowed?
+      raise HTTPException.new(404) unless exists?
 
       # Resource status
       check_etag        if etag
@@ -75,8 +87,8 @@ module Restfulness
 
     class << self
 
-      def supported_actions
-        @_actions ||= (instance_methods & [:get, :put, :post, :delete, :head])
+      def supported_methods
+        @_actions ||= (instance_methods & [:get, :put, :post, :delete, :head, :patch])
       end
 
     end
