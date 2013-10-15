@@ -14,12 +14,15 @@ module Restfulness
       @request = request
 
       # Default headers
-      @headers = {'Content-Type' => 'application/json'}
+      @headers = {'Content-Type' => 'application/json; charset=utf-8'}
     end
 
     def run
+      logger.info("Responding to #{request.action.to_s.upcase} #{request.uri.to_s} from #{request.remote_ip}")
+
       route = request.route
       if route
+        logger.info("Using resource: #{route.resource_name}")
         resource = route.build_resource(request, self)
 
         # run callbacks, if any fail, they'll raise an error
@@ -28,13 +31,18 @@ module Restfulness
         # Perform the actual work
         result = resource.call
 
-        @code    ||= 200
+        @code    ||= (result ? 200 : 204)
         @payload   = MultiJson.encode(result)
       else
+        logger.error("No route found")
         # This is not something we can deal with, pass it on
-        @code    = nil
+        @code    = 404
         @payload = nil
       end
+    end
+
+    def logger
+      Restfulness.logger
     end
 
   end

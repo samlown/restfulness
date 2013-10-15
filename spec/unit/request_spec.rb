@@ -17,6 +17,13 @@ describe Restfulness::Request do
   let :obj do
     klass.new(app)
   end
+
+  class RequestResource < Restfulness::Resource
+  end
+  let :resource do
+    RequestResource
+  end
+    
   
   describe "#initialize" do
     it "should prepare basic objects" do
@@ -42,7 +49,7 @@ describe Restfulness::Request do
     context "with route" do
       let :path do
         obj.uri = "https://example.com/project/12345"
-        route = Restfulness::Route.new('project', Class.new(Restfulness::Resource))
+        route = Restfulness::Route.new('project', resource)
         obj.stub(:route).and_return(route)
         obj.path
       end
@@ -61,7 +68,7 @@ describe Restfulness::Request do
     it "should ask the router for a route" do
       obj.uri = "https://example.com/project/12345"
       route = double(:Route)
-      app.router.should_receive(:route_for).with(obj.uri).and_return(route)
+      app.router.should_receive(:route_for).with(obj.uri.path).and_return(route)
       obj.route.should eql(route)
     end
   end

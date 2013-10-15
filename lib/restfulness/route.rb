@@ -6,21 +6,14 @@ module Restfulness
     attr_accessor :path
 
     # Reference to the class that will handle requests for this route
-    attr_accessor :resource
+    attr_accessor :resource_name
 
     def initialize(*args)
-      self.path = []
-      args.each do |arg|
-        case arg
-        when Numeric, String, Symbol
-          path << arg if arg != :id
-        when Class
-          self.resource = arg
-        end
-      end
+      self.resource_name = args.pop.to_s
+      self.path = args.reject{|arg| arg == :id}
 
-      if resource.nil? || !(resource < Resource)
-        raise "Route error: \"#{path.join('/')}\" is missing resource!" 
+      if resource_name.empty? || resource.nil? # Try to load the resource
+        raise ArgumentError, "Please provide a resource!"
       end
     end
 
@@ -29,6 +22,11 @@ module Restfulness
     end
 
     def handles?(parts)
+      # Make sure same length (accounting for id)
+      diff = parts.length - path.length
+      return false if diff != 0 && diff != 1
+
+      # Compare the pairs
       path.each_with_index do |slug, i|
         if slug.is_a?(String) or slug.is_a?(Numeric)
           return false if parts[i] != slug.to_s
@@ -37,8 +35,12 @@ module Restfulness
       true
     end
 
-    def build_resource(request)
-      resource.new(request)
+    def resource
+      resource_name.constantize
+    end
+
+    def build_resource(request, response)
+      resource.new(request, response)
     end
 
   end

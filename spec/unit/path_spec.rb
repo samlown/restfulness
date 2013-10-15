@@ -2,6 +2,9 @@ require 'spec_helper'
 
 describe Restfulness::Path do
 
+  class PathResource < Restfulness::Resource
+  end
+
   let :klass do
     Restfulness::Path
   end
@@ -9,9 +12,7 @@ describe Restfulness::Path do
     Restfulness::Route
   end
   let :resource_class do
-    Class.new(Restfulness::Resource) do
-      # nothing here
-    end
+    PathResource
   end
   let :simple_route do
     route_class.new('project', resource_class)

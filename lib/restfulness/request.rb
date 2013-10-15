@@ -30,6 +30,9 @@ module Restfulness
     # Raw HTTP body, for POST and PUT requests.
     attr_accessor :body
 
+    # IP address of requester
+    attr_accessor :remote_ip
+
     def initialize(app)
       @app = app
 
@@ -49,7 +52,7 @@ module Restfulness
 
     def route
       # Determine the route from the uri
-      @route ||= app.router.route_for(uri)
+      @route ||= app.router.route_for(uri.path)
     end
 
     def query

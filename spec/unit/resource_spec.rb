@@ -2,6 +2,21 @@ require 'spec_helper'
 
 describe Restfulness::Resource do
 
+  class GetResource < Restfulness::Resource
+    def get
+      'result'
+    end
+  end
+
+  class GetPostResource < Restfulness::Resource
+    def get
+      'result'
+    end
+    def post
+      'post'
+    end
+  end
+
   let :app do
     Class.new(Restfulness::Application) do
       routes do
@@ -18,11 +33,7 @@ describe Restfulness::Resource do
 
   describe "#initialize" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-      end
+      GetResource
     end
     it "should assign request and response" do
       obj = resource.new(request, response)
@@ -33,30 +44,19 @@ describe Restfulness::Resource do
 
   describe "#options" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-        def post
-          'post'
-        end
-      end
+      GetPostResource
     end
 
     it "should return list of supported methods" do
       obj = resource.new(request, response)
       obj.options.should be_nil
-      response.headers['Allow'].should eql('GET, POST')
+      response.headers['Allow'].should eql('GET, POST, OPTIONS')
     end
   end
 
   describe "#call" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-      end
+      GetResource
     end
     it "should perform action" do
       request.action = :get
@@ -69,14 +69,7 @@ describe Restfulness::Resource do
 
   describe "#method_allowed?" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-        def post
-          'post'
-        end
-      end
+      GetPostResource
     end
 
     it "should be true on valid method" do
@@ -94,14 +87,7 @@ describe Restfulness::Resource do
 
   describe "basic callback responses" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-        def post
-          'post'
-        end
-      end
+      GetPostResource
     end
 
     let :obj do
@@ -123,14 +109,7 @@ describe Restfulness::Resource do
 
   describe "#check_callbacks" do
     let :resource do
-      Class.new(Restfulness::Resource) do
-        def get
-          'result'
-        end
-        def post
-          'post'
-        end
-      end
+      GetPostResource
     end
 
     let :obj do
@@ -213,12 +192,14 @@ describe Restfulness::Resource do
 
   describe "#error" do
 
-    it "should raise a new exception" do
-      klass = Class.new(Restfulness::Resource) do
-        def get
-          error(418, {})
-        end
+    class Get418Resource < Restfulness::Resource
+      def get
+        error(418, {})
       end
+    end
+
+    it "should raise a new exception" do
+      klass = Get418Resource
       obj = klass.new(request, response)
       expect {
         obj.get

@@ -9,33 +9,40 @@ module Restfulness
 
         # Make sure we understand the request
         request = Request.new(app)
-        prepare_request(rack_req, request)
+        prepare_request(env, rack_req, request)
+
 
         # Prepare a suitable response
         response = Response.new(request)
         response.run
 
+
         # No need to provide an empty response
-        if response.code
-          [response.code, response.headers, response.payload]
-        else
-          nil
-        end
+        log_response(response.code)
+        [response.code, response.headers, [response.payload || ""]]
+
       rescue HTTPException => e
-        [e.code, {}, e.payload]
-      rescue
-        # Something unknown went wrong
-        [504, {}, STATUSES[504]]
+        log_response(e.code)
+        [e.code, {}, [e.payload || ""]]
+
+      #rescue Exception => e
+      #  log_response(500)
+      #  puts
+      #  puts e.message
+      #  puts e.backtrace
+      #  # Something unknown went wrong
+      #  [500, {}, [STATUSES[500]]]
       end
 
       protected
 
-      def prepare_request(rack_req, request)
-        request.uri     = rack_req.url
-        request.action  = parse_action(rack_req.request_method)
-        request.headers = prepare_headers(rack_req.headers)
-        request.query   = rack_req.GET
-        request.body    = rack_req.body
+      def prepare_request(env, rack_req, request)
+        request.uri       = rack_req.url
+        request.action    = parse_action(rack_req.request_method)
+        request.query     = rack_req.GET
+        request.body      = rack_req.body
+        request.remote_ip = rack_req.ip
+        request.headers   = prepare_headers(env)
       end
 
       def parse_action(action)
@@ -57,12 +64,21 @@ module Restfulness
         end
       end
 
-      def prepare_headers(headers)
+      def log_response(code)
+        logger.info("Completed #{code} #{STATUSES[code]}")
+      end
+
+      def prepare_headers(env)
         res = {}
-        headers.each do |k,v|
-          res[k.downcase.gsub(/-/, '_').to_sym] = v
+        env.each do |k,v|
+          next unless k =~ /^HTTP_/
+          res[k.sub(/^HTTP_/, '').downcase.gsub(/-/, '_').to_sym] = v
         end
         res
+      end
+
+      def logger
+        Restfulness.logger
       end
 
     end

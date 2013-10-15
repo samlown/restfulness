@@ -3,13 +3,16 @@ require 'spec_helper'
 
 describe Restfulness::Response do
 
+  class ResponseResource < Restfulness::Resource
+  end
+
   let :klass do
     Restfulness::Response
   end
   let :app do
     Class.new(Restfulness::Application) do
       routes do
-        add 'project', Class.new(Restfulness::Resource)
+        add 'project', ResponseResource
       end
     end
   end
@@ -23,7 +26,7 @@ describe Restfulness::Response do
   describe "#initialize" do
     it "should assign request and headers" do
       obj.request.should eql(request)
-      obj.headers.should eql({'Content-Type' => 'application/json'})
+      obj.headers.should eql({'Content-Type' => 'application/json; charset=utf-8'})
       obj.code.should be_nil
     end
   end
@@ -33,7 +36,7 @@ describe Restfulness::Response do
       it "should not do anything" do
         request.stub(:route).and_return(nil)
         obj.run
-        obj.code.should be_nil
+        obj.code.should eql(404)
         obj.payload.should be_nil
       end
     end

@@ -55,7 +55,7 @@ module Restfulness
       raise HTTPException.new(404) unless exists?
 
       # Resource status
-      check_etag        if etag
+      check_etag if etag
       check_if_modified if last_modified
     end
 
@@ -68,6 +68,10 @@ module Restfulness
       raise HTTPException.new(code, payload, opts)
     end
 
+    def logger
+      Restfulness.logger
+    end
+
 
     private
 
@@ -76,6 +80,7 @@ module Restfulness
       if date && date == last_modified.to_s
         raise HTTPException.new(304)
       end
+      response.headers['Last-Modified'] = last_modified
     end
 
     def check_etag
@@ -83,12 +88,13 @@ module Restfulness
       if tag && tag == etag.to_s
         raise HTTPException.new(304)
       end
+      response.headers['ETag'] = etag
     end
 
     class << self
 
       def supported_methods
-        @_actions ||= (instance_methods & [:get, :put, :post, :delete, :head, :patch])
+        @_actions ||= (instance_methods & [:get, :put, :post, :delete, :head, :patch, :options])
       end
 
     end

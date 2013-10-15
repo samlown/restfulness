@@ -20,22 +20,58 @@ module Restfulness
   #
   class Application
 
-    attr_accessor :dispatcher
-
-    def initialize
-      self.dispatcher = Dispatchers::Rack.new(self)
-    end
-
     def router
       self.class.router
     end
 
+    # Rack Handling.
+    # Forward rack call to dispatcher
+    def call(env)
+      @app ||= begin
+        this = self
+        dispatcher = Dispatchers::Rack.new(self)
+        Rack::Builder.new do
+          this.class.middlewares.each do |middleware|
+            use middleware
+          end
+          run dispatcher
+        end
+      end
+      @app.call(env)
+    end
+
+
     class << self
 
-      attr_accessor :router
+      attr_accessor :router, :middlewares
 
-      def routes(opts = {}, &block)
-        self.router = Router.new(opts, &block)
+      def routes(&block)
+        # Store the block so we can parse it at run time (autoload win!)
+        @router = Router.new(&block)
+      end
+
+      # A simple array of rack middlewares that will be applied
+      # before handling the request in Restfulness.
+      #
+      # Probably most useful for adding the ActiveDispatch::Reloader
+      # as used by Rails to reload on each request. e.g.
+      #
+      #    middlewares << ActiveDispatch::Reloader
+      #
+      def middlewares
+        @middlewares ||= [
+          Rack::ShowExceptions
+        ]
+      end
+
+      # Quick access to the Restfulness logger.
+      def logger
+        Restfulness.logger
+      end
+
+      # Override the default Restfulness logger.
+      def logger=(logger)
+        Restfulness.logger = logger
       end
 
     end

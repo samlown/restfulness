@@ -5,9 +5,9 @@ module Restfulness
 
     attr_accessor :routes
 
-    def initialize(opts = {}, &block)
+    def initialize(&block)
       self.routes = []
-      instance_eval(&block)
+      instance_eval(&block) if block_given?
     end
 
     def add(*args)
@@ -15,19 +15,11 @@ module Restfulness
     end
 
     def route_for(path)
-      parts = path.split(/\//)
+      parts = path.gsub(/^\/|\/$/, '').split(/\//)
       routes.each do |route|
         return route if route.handles?(parts)
       end
       nil
-    end
-
-    protected
-
-    def parse_path(url)
-      parser = URI::Parser.new
-      parser.parse(url)
-
     end
 
   end
