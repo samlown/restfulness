@@ -37,7 +37,8 @@ describe Restfulness::Response do
         request.stub(:route).and_return(nil)
         obj.run
         obj.code.should eql(404)
-        obj.payload.should be_nil
+        obj.payload.should be_empty
+        obj.headers['Content-Length'].should eql(0.to_s)
       end
     end
     context "with route" do
@@ -54,7 +55,9 @@ describe Restfulness::Response do
         route.stub(:build_resource).and_return(resource)
         obj.run 
         obj.code.should eql(200)
-        obj.payload.should eql("{\"foo\":\"bar\"}")
+        str = "{\"foo\":\"bar\"}"
+        obj.payload.should eql(str)
+        obj.headers['Content-Length'].should eql(str.bytesize.to_s)
       end      
     end
   end

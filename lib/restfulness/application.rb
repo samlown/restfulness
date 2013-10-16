@@ -27,19 +27,22 @@ module Restfulness
     # Rack Handling.
     # Forward rack call to dispatcher
     def call(env)
-      @app ||= begin
-        this = self
-        dispatcher = Dispatchers::Rack.new(self)
-        Rack::Builder.new do
-          this.class.middlewares.each do |middleware|
-            use middleware
-          end
-          run dispatcher
-        end
-      end
+      @app ||= build_rack_app
       @app.call(env)
     end
 
+    protected
+
+    def build_rack_app
+      this = self
+      dispatcher = Dispatchers::Rack.new(self)
+      Rack::Builder.new do
+        this.class.middlewares.each do |middleware|
+          use middleware
+        end
+        run dispatcher
+      end
+    end
 
     class << self
 

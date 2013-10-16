@@ -37,12 +37,19 @@ module Restfulness
         logger.error("No route found")
         # This is not something we can deal with, pass it on
         @code    = 404
-        @payload = nil
+        @payload = ""
       end
+      update_content_length
     end
 
     def logger
       Restfulness.logger
+    end
+
+    protected
+    
+    def update_content_length
+      @headers['Content-Length'] = @payload.bytesize.to_s
     end
 
   end

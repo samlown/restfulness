@@ -109,7 +109,11 @@ describe Restfulness::Resource do
 
   describe "#check_callbacks" do
     let :resource do
-      GetPostResource
+      Class.new(GetPostResource) do
+        def head; nil; end
+        def put; nil; end
+        def delete; nil; end
+      end
     end
 
     let :obj do
@@ -130,11 +134,22 @@ describe Restfulness::Resource do
       }.to raise_error(Restfulness::HTTPException, "Method Not Allowed")
     end
 
-    it "should raise error when not exists" do
-      obj.stub(:exists?).and_return(false)
-      expect {
+    [:head, :get, :put, :delete].each do |action|
+      it "should raise error when not exists for #{action.to_s.upcase}" do
+        request.action = action
+        obj.stub(:exists?).and_return(false)
+        expect {
+          obj.check_callbacks
+        }.to raise_error(Restfulness::HTTPException, "Resource Not Found")
+      end
+    end
+
+    [:post].each do |action|
+      it "should not check exists? for #{action.to_s.upcase}" do
+        obj.request.action = action
+        obj.should_not_receive(:exists?)
         obj.check_callbacks
-      }.to raise_error(Restfulness::HTTPException, "Resource Not Found")
+      end
     end
 
     it "should raise error when not authorized" do
@@ -167,6 +182,15 @@ describe Restfulness::Resource do
           obj.check_callbacks
         }.to_not raise_error
       end
+      
+      it "should not be called unless action is :get or :head" do
+        obj.should_not_receive(:etag)
+        request.headers[:if_none_match] = 'sometag'
+        [:post, :put, :delete].each do |action|
+          request.action = action
+          obj.check_callbacks
+        end
+      end
     end
 
     describe "with if modified" do
@@ -187,6 +211,16 @@ describe Restfulness::Resource do
           obj.check_callbacks
         }.to_not raise_error
       end
+
+      it "should not be called unless action is :get or :head" do
+        obj.should_not_receive(:last_modified)
+        request.headers[:if_modified_since] = 'somedate'
+        [:post, :put, :delete].each do |action|
+          request.action = action
+          obj.check_callbacks
+        end
+      end
+
     end
   end
 

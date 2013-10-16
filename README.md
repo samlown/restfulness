@@ -86,7 +86,7 @@ end
 
 ```
 
-Resources are now important. I, for one, welcome our new resource overloads. They're a clear and consise way of separating logic between different classes, so an individual model has nothing to do with a collection of models, even if the same model may be provided in the result set.
+I, for one, welcome our new resource overloads. They're a clear and consise way of separating logic between different classes, so an individual model has nothing to do with a collection of models, even if the same model may be provided in the result set.
 
 
 ## Installation
@@ -124,11 +124,27 @@ An application is designed to be included in your Rails, Sinatra, or other Rack 
 ```ruby
 run Rack::URLMap.new(
   "/"       => MyRailsApp::Application,
-  "/api"    => MyAppAPI.new.dispatcher
+  "/api"    => MyAppAPI.new
 )
 ```
 
 By default, Restfulness comes with a Rack compatible dispatcher, but in the future it might make sense to add others.
+
+If you want to run Restfulness standalone, simply create a `config.ru` that will load up your application:
+
+```ruby
+require 'my_app'
+run MyApp.new
+```
+
+You can then run this with rackup:
+
+```
+bundle exec rackup
+```
+
+For an example, checkout the `/example` directory in the source code.
+
 
 ### Routes
 
@@ -138,7 +154,7 @@ The aim of routes in Restfulness are to be stupid simple. These are the basic ru
  * Order is important.
  * Strings are matched directly.
  * Symbols match anything, and are accessible as path attributes.
- * Every route automically gets an :id parameter at the end, that may or may not be null.
+ * Every route automically gets an :id parameter at the end, that may or may not have a null value.
 
 Lets see a few examples:
 
@@ -156,21 +172,95 @@ end
 ```
 
 
-
 ### Resources
 
-Resources are like Controllers in a Rails project. They handle the basic HTTP actions using methods that match the same name as the action.
+Resources are like Controllers in a Rails project. They handle the basic HTTP actions using methods that match the same name as the action. The result of an action is serialized into a JSON object automatically. The actions supported by a resource are:
 
-Resources also have support for callbacks. These have similar objectives to the callbacks used in [Ruby Webmachine](https://github.com/seancribbs/webmachine-ruby) that control the flow of the application using HTTP events.
+ * `get`
+ * `head`
+ * `post`
+ * `put`
+ * `delete`
+ * `options` - this is the only action provded by default
+
+When creating your resource, simply define the methods you'd like to use and ensure each has a result:
+
+```ruby
+class ProjectResource < Restfulness::Resource
+  # Return the basic object
+  def get
+    project
+  end
+
+  # Update the object
+  def put
+    project.update(params)
+  end
+
+  protected
+
+  def project
+    @project ||= Project.find(request.path[:id])
+  end
+end
+```
+
+Checking which methods are available is also possible by sending an `OPTIONS` action. Using the above resource as a base:
+
+    curl -v -X OPTIONS http://localhost:9292/project
+
+Will include an `Allow` header that lists: "GET, PUT, OPTIONS".
+
+Resources also have support for simple set of built-in callbacks. These have similar objectives to the callbacks used in [Ruby Webmachine](https://github.com/seancribbs/webmachine-ruby) that control the flow of the application using HTTP events.
+
+The supported callbacks are:
+
+ * `exists?` - True by default, not called in create actions like POST.
+ * `authorized?` - True by default, is the current user valid?
+ * `allowed?` - True by default, does the current have access to the resource?
+ * `last_modified` - The date of last update on the model, only called for GET and HEAD requests. Validated against the `If-Modified-Since` header.
+ * `etag` - Unique identifier for the object, only called for GET and HEAD requests. Validated against the `If-None-Match` header.
+
+To use them, simply override the method:
+
+```ruby
+class ProjectResource < Restfulness::Resource
+  # Does the project exist? only called in GET request
+  def exists?
+    !project.nil?
+  end
+
+  # Return a 304 status if the client can used a cached resource
+  def last_modified
+    project.updated_at.to_s
+  end
+
+  # Return the basic object
+  def get
+    project
+  end
+
+  # Update the object
+  def post
+    Project.create(params)
+  end
+
+  protected
+
+  def project
+    @project ||= Project.find(request.path[:id])
+  end
+end
+```
 
 
 ### Requests
 
-All resource instances have access to a `Request` object via the `#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request, including headers, the request URL, path entries, the query, body and/or parameters.
+All resource instances have access to a `Request` object via the `#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request: headers, the request URL, path entries, the query, body and/or parameters.
 
-Restfulness takes a slightly different, more methodical, approach to handling paths, queries, and parameters. Rails controllers will typically mash everything together into a `params` hash. While this is convenient for most use cases, it makes it much more difficult to separate values from different contexts. The result is that your controllers in Rails end up requiring a hash containing `:object` that points to the attributes you want to store, despite having already defined this information in the controllers URL. Backbone.js developers will have notices the pain in handling this as serialized Backbone Models by default do not include a wrapper key.
+Restfulness takes a slightly different approach to handling paths, queries, and parameters. Rails and Sinatra apps will typically mash everything together into a `params` hash. While this is convenient for most use cases, it makes it much more difficult to separate values from different contexts. The effects of this are most noticable if you've ever used Models Backbone.js or similar Javascript library. By default a Backbone Model will provide attributes without a prefix in the POST body, so to be able to differenciate between query, path and body parameters you need to ignore the extra attributes, or hack a part of your code to re-add a prefix.
 
-The following key methods are provided in a request object for dealing with parameters:
+The following key methods are provided in a request object:
 
 ```ruby
 # A URI object
@@ -200,6 +290,34 @@ request.body               # "{'key':'value'}" - string payload
 request.params             # {'key' => 'value'} - usually a JSON deserialized object
 ```
 
+## Caveats and TODOs
+
+Restfulness is still very much a work in progress. Here is a list of things that we'd like to improve or fix:
+
+ * Support for more serializers, not just JSON.
+ * Reloading is a PITA (see note below).
+ * Needs more functional testing.
+ * Support for before and after filters in resources, although I'm slightly aprehensive about this.
+
+## Reloading
+
+Reloading is complicated. Unfortunately we're all used to the way Rails projects magically reload changed files so you don't have to restart the server after each change.
+
+If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun).
+
+If you're adding Restfulness to a Rails project, you can take advantage of the `ActionDispatch::Reloader` rack middleware. Simply include it in the application definition:
+
+```ruby
+class MyAPI < Restfulness::Application
+  if Rails.env.development?
+    middlewares << ActionDispatch::Relaoder
+  end
+  routes do
+    # etc. etc.
+  end
+```
+
+We're still working on ways to improve this. If you have any ideas, please send me a pull request!
 
 ## Contributing
 
@@ -209,3 +327,16 @@ request.params             # {'key' => 'value'} - usually a JSON deserialized ob
 4. Commit your changes (`git commit -am 'Add some feature'`)
 5. Push to the branch (`git push origin my-new-feature`)
 6. Create new Pull Request
+
+## Contributors
+
+Restfulness was created by Sam Lown <me@samlown.com> as a solution for building simple APIs at [Cabify](http://www.cabify.com).
+
+
+## History
+
+### 0.1.0 - October 16, 2013
+
+First release!
+
+

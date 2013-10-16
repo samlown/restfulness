@@ -52,11 +52,18 @@ module Restfulness
       raise HTTPException.new(405) unless method_allowed?
       raise HTTPException.new(401) unless authorized?
       raise HTTPException.new(403) unless allowed?
-      raise HTTPException.new(404) unless exists?
 
-      # Resource status
-      check_etag if etag
-      check_if_modified if last_modified
+      # The following callbacks only make sense for certain methods
+      if [:head, :get, :put, :delete].include?(request.action)
+
+        raise HTTPException.new(404) unless exists?
+
+        if [:get, :head].include?(request.action)
+          # Resource status
+          check_etag if etag
+          check_if_modified if last_modified
+        end
+      end
     end
 
     ##

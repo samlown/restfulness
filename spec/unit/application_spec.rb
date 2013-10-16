@@ -3,26 +3,46 @@ require 'spec_helper'
 
 describe Restfulness::Application do
 
-  describe "#initialize" do
-    it "should build a dispatcher" do
-      klass = Class.new(Restfulness::Application)
+  let :klass do
+    Class.new(Restfulness::Application) do
+      routes do
+        # nothing
+      end
+    end
+  end
+
+  describe "#router" do
+    it "should access class's router" do
       obj = klass.new
-      obj.dispatcher.should_not be_nil
-      obj.dispatcher.is_a?(Restfulness::Dispatcher).should be_true
+      obj.router.should eql(klass.router)
+    end
+  end
+
+  describe "#call" do
+    it "should build rack app and call with env" do
+      env = {}
+      obj = klass.new
+      app = double(:app)
+      app.should_receive(:call).with(env)
+      obj.should_receive(:build_rack_app).and_return(app)
+      obj.call(env)
+    end
+  end
+
+  describe "#build_rack_app (protected)" do
+    it "should build a new rack app with middlewares" do
+      obj = klass.new
+      app = obj.send(:build_rack_app)
+      app.should be_a(Rack::Builder)
+      # Note, this might brake if Rack changes!
+      app.instance_variable_get(:@use).first.call.should be_a(klass.middlewares.first)
+      app.instance_variable_get(:@run).should be_a(Restfulness::Dispatchers::Rack)
     end
   end
 
   describe ".routes" do
 
     context "basic usage" do
-      let :klass do
-        Class.new(Restfulness::Application) do
-          routes do
-            # nothing
-          end
-        end
-      end
-
       it "should build a new router with block" do
         klass.router.should_not be_nil
         klass.router.should be_a(Restfulness::Router)
@@ -33,15 +53,38 @@ describe Restfulness::Application do
         obj.router.should eql(klass.router)
       end
 
-      it "should pass options and block to Router instance" do
+      it "should pass block to Router instance" do
         block = lambda { }
-        Restfulness::Router.should_receive(:new).with({:test => :foo}, &block)
+        Restfulness::Router.should_receive(:new).with(&block)
         Class.new(Restfulness::Application) do
-          routes :test => :foo, &block
+          routes &block
         end
       end
     end
 
+  end
+
+  describe ".middlewares" do
+    it "should provide simple array of middlewares" do
+      klass.middlewares.should be_a(Array)
+      klass.middlewares.should include(Rack::ShowExceptions)
+    end
+  end
+
+  describe ".logger" do
+    it "should return main logger" do
+      klass.logger.should eql(Restfulness.logger)
+    end
+  end
+
+  describe ".logger=" do
+    it "should set main logger" do
+      orig = Restfulness.logger
+      logger = double(:Logger)
+      klass.logger = logger
+      Restfulness.logger.should eql(logger)
+      Restfulness.logger = orig
+    end
   end
 
 

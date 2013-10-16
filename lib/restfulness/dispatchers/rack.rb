@@ -43,6 +43,9 @@ module Restfulness
         request.body      = rack_req.body
         request.remote_ip = rack_req.ip
         request.headers   = prepare_headers(env)
+
+        # Sometimes rack removes content type from headers
+        request.headers[:content_type] ||= rack_req.content_type
       end
 
       def parse_action(action)
