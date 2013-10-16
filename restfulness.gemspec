@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.email         = ["me@samlown.com"]
   spec.description   = %q{Simple REST server that focuses on resources instead of routes.}
   spec.summary       = %q{Use to create a powerful, yet simple REST API in your application.}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/samlown/restfulness"
   spec.license       = "MIT"
 
   spec.files         = `git ls-files`.split($/)

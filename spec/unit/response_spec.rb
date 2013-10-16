@@ -27,7 +27,7 @@ describe Restfulness::Response do
     it "should assign request and headers" do
       obj.request.should eql(request)
       obj.headers.should eql({'Content-Type' => 'application/json; charset=utf-8'})
-      obj.code.should be_nil
+      obj.status.should be_nil
     end
   end
 
@@ -36,7 +36,7 @@ describe Restfulness::Response do
       it "should not do anything" do
         request.stub(:route).and_return(nil)
         obj.run
-        obj.code.should eql(404)
+        obj.status.should eql(404)
         obj.payload.should be_empty
         obj.headers['Content-Length'].should eql(0.to_s)
       end
@@ -54,7 +54,7 @@ describe Restfulness::Response do
         resource.should_receive(:call).and_return({:foo => 'bar'})
         route.stub(:build_resource).and_return(resource)
         obj.run 
-        obj.code.should eql(200)
+        obj.status.should eql(200)
         str = "{\"foo\":\"bar\"}"
         obj.payload.should eql(str)
         obj.headers['Content-Length'].should eql(str.bytesize.to_s)

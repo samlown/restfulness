@@ -8,6 +8,9 @@ require 'rack/utils'
 require 'rack/showexceptions'
 require 'rack/builder'
 
+
+require "restfulness/resources/events"
+
 require "restfulness/application"
 require "restfulness/dispatcher"
 require "restfulness/exceptions"

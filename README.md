@@ -128,8 +128,6 @@ run Rack::URLMap.new(
 )
 ```
 
-By default, Restfulness comes with a Rack compatible dispatcher, but in the future it might make sense to add others.
-
 If you want to run Restfulness standalone, simply create a `config.ru` that will load up your application:
 
 ```ruby
@@ -143,7 +141,7 @@ You can then run this with rackup:
 bundle exec rackup
 ```
 
-For an example, checkout the `/example` directory in the source code.
+For a very simple example project, checkout the `/example` directory in the source code.
 
 
 ### Routes
@@ -290,11 +288,99 @@ request.body               # "{'key':'value'}" - string payload
 request.params             # {'key' => 'value'} - usually a JSON deserialized object
 ```
 
+## Error Handling
+
+If you want your application to return anything other than a 200 (or 202) status, you have a set of different methods that allow you to send a different code back to the client.
+
+The easiest method is probably just to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
+
+```ruby
+class ProjectResource < Restfulness::Resource
+  def put
+    if project.update_attributes(request.params)
+      project
+    else
+      response.status = 403
+      project.errors
+    end
+  end
+end
+```
+
+The favourite method in Restfulness however is to use the `HTTPException` class and the selection of helper methods that will raise the error for you. For example:
+
+```ruby
+class ProjectResource < Restfulness::Resource
+  def put
+    unless project.update_attributes(request.params)
+      forbidden!(project.errors)
+    end
+    project
+  end
+end
+```
+
+The `forbidden!` bang method will call the `error!` method, which in turn will raise an `HTTPException` with the appropriate status code. Exceptions are permitted to include a payload also, so you could override the `error!` method if you wished with code that will automatically re-format the payload. Another example:
+
+```ruby
+# Regular resource
+class ProjectResource < ApplicationResource
+  def put
+    unless project.update_attributes(request.params)
+      forbidden!(project) # only send the project object!
+    end
+    project
+  end
+end
+
+# Main Application Resource
+class ApplicationResource < Restfulness::Resource
+  # Overwrite the regular error handler so we can provide
+  # our own format.
+  def error!(status, payload = "", opts = {})
+    case payload
+    when ActiveRecord::Base # or your favourite ORM
+      payload = {
+        :errors => payload.errors.full_messages
+      }
+    end
+    super(status, payload, opts)
+  end
+end
+
+```
+
+This can be a really nice way to mold your errors into a standard format. All HTTP exceptions on the Resources will pass through the `error!`, even those that a triggered by a callback, so it gives a great way to provide your own more complete result, or even just resort to a simple string.
+
+The currently built in error methods are:
+
+ * `not_modified`
+ * `bad_request`
+ * `unauthorized`
+ * `payment_required`
+ * `forbidden`
+ * `resource_not_found`
+ * `request_timeout`
+ * `conflict`
+ * `gone`
+ * `unprocessable_entity`
+
+If you'd like to see me more, please send us a pull request! Failing that, you can create your own by writing something along the lines of:
+
+```ruby
+def im_a_teapot!(*args)
+  error!(418, *args)
+end
+```
+
+
 ## Caveats and TODOs
 
 Restfulness is still very much a work in progress. Here is a list of things that we'd like to improve or fix:
 
- * Support for more serializers, not just JSON.
+ * Support for more serializers and content types, not just JSON.
+ * Support path methods for automatic URL generation.
+ * Support redirect exceptions.
  * Reloading is a PITA (see note below).
  * Needs more functional testing.
  * Support for before and after filters in resources, although I'm slightly aprehensive about this.

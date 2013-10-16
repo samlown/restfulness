@@ -1,6 +1,7 @@
 module Restfulness
 
   class Resource
+    include Resources::Events
 
     attr_reader :request, :response
 
@@ -49,14 +50,14 @@ module Restfulness
 
     def check_callbacks
       # Access control
-      raise HTTPException.new(405) unless method_allowed?
-      raise HTTPException.new(401) unless authorized?
-      raise HTTPException.new(403) unless allowed?
+      method_not_allowed! unless method_allowed?
+      unauthorized!       unless authorized?
+      forbidden!          unless allowed?
 
       # The following callbacks only make sense for certain methods
       if [:head, :get, :put, :delete].include?(request.action)
 
-        raise HTTPException.new(404) unless exists?
+        resource_not_found! unless exists?
 
         if [:get, :head].include?(request.action)
           # Resource status
@@ -66,26 +67,18 @@ module Restfulness
       end
     end
 
-    ##
-
-
     protected
-
-    def error(code, payload = nil, opts = {})
-      raise HTTPException.new(code, payload, opts)
-    end
 
     def logger
       Restfulness.logger
     end
-
 
     private
 
     def check_if_modified
       date = request.headers[:if_modified_since]
       if date && date == last_modified.to_s
-        raise HTTPException.new(304)
+        not_modified!
       end
       response.headers['Last-Modified'] = last_modified
     end
@@ -93,7 +86,7 @@ module Restfulness
     def check_etag
       tag = request.headers[:if_none_match]
       if tag && tag == etag.to_s
-        raise HTTPException.new(304)
+        not_modified!
       end
       response.headers['ETag'] = etag
     end

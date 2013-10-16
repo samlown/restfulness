@@ -11,27 +11,12 @@ module Restfulness
         request = Request.new(app)
         prepare_request(env, rack_req, request)
 
-
         # Prepare a suitable response
         response = Response.new(request)
         response.run
 
-
-        # No need to provide an empty response
-        log_response(response.code)
-        [response.code, response.headers, [response.payload || ""]]
-
-      rescue HTTPException => e
-        log_response(e.code)
-        [e.code, {}, [e.payload || ""]]
-
-      #rescue Exception => e
-      #  log_response(500)
-      #  puts
-      #  puts e.message
-      #  puts e.backtrace
-      #  # Something unknown went wrong
-      #  [500, {}, [STATUSES[500]]]
+        log_response(response.status)
+        [response.status, response.headers, [response.payload || ""]]
       end
 
       protected
@@ -67,8 +52,8 @@ module Restfulness
         end
       end
 
-      def log_response(code)
-        logger.info("Completed #{code} #{STATUSES[code]}")
+      def log_response(status)
+        logger.info("Completed #{status} #{STATUSES[status]}")
       end
 
       def prepare_headers(env)

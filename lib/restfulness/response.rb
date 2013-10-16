@@ -7,14 +7,11 @@ module Restfulness
     attr_reader :request
 
     # Outgoing data
-    attr_reader :code, :headers, :payload
-
+    attr_reader :status, :headers, :payload
 
     def initialize(request)
       @request = request
-
-      # Default headers
-      @headers = {'Content-Type' => 'application/json; charset=utf-8'}
+      @headers = {}
     end
 
     def run
@@ -31,15 +28,15 @@ module Restfulness
         # Perform the actual work
         result = resource.call
 
-        @code    ||= (result ? 200 : 204)
-        @payload   = MultiJson.encode(result)
+        update_status_and_payload(result.nil? ? 200 : 204, result)
       else
-        logger.error("No route found")
-        # This is not something we can deal with, pass it on
-        @code    = 404
-        @payload = ""
+        update_status_and_payload(404)
       end
-      update_content_length
+
+    rescue HTTPException => e # Deal with HTTP exceptions
+      logger.error(e.message)
+      @headers.update(e.headers)
+      update_status_and_payload(e.status, e.payload)
     end
 
     def logger
@@ -47,8 +44,29 @@ module Restfulness
     end
 
     protected
+
+    def update_status_and_payload(status, payload = "")
+      @status  = status
+      @payload = prepare_payload(payload)
+    end
+
+    def prepare_payload(payload)
+      if payload.is_a?(String)
+        update_content_headers(:text)
+        payload
+      else
+        update_content_headers(:json)
+        MultiJson.encode(payload)
+      end
+    end
     
-    def update_content_length
+    def update_content_headers(type = :json)
+      case type
+      when :json
+        @headers['Content-Type'] = 'application/json; charset=utf-8'
+      else # Assume text
+        @headers['Content-Type'] = 'text/plain; charset=utf-8'
+      end
       @headers['Content-Length'] = @payload.bytesize.to_s
     end
 
