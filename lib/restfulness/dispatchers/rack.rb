@@ -22,12 +22,14 @@ module Restfulness
       protected
 
       def prepare_request(env, rack_req, request)
-        request.uri       = rack_req.url
-        request.action    = parse_action(rack_req.request_method)
-        request.query     = rack_req.GET
-        request.body      = rack_req.body
-        request.remote_ip = rack_req.ip
-        request.headers   = prepare_headers(env)
+        request.uri        = rack_req.url
+        request.action     = parse_action(rack_req.request_method)
+        request.query      = rack_req.GET
+        request.body       = rack_req.body
+        request.headers    = prepare_headers(env)
+
+        request.remote_ip  = rack_req.ip
+        request.user_agent = rack_req.user_agent
 
         # Sometimes rack removes content type from headers
         request.headers[:content_type] ||= rack_req.content_type

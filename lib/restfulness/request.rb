@@ -30,8 +30,8 @@ module Restfulness
     # Raw HTTP body, for POST and PUT requests.
     attr_accessor :body
 
-    # IP address of requester
-    attr_accessor :remote_ip
+    # Additional useful fields
+    attr_accessor :remote_ip, :user_agent
 
     def initialize(app)
       @app = app
