@@ -27,15 +27,15 @@ module Restfulness
       ]
 
       # Main error event handler
-      def error!(code, *args)
-        payload = args.shift || ""
-        opts    = args.shift || {}
+      def error!(code, payload = "", opts = {})
         raise HTTPException.new(code, payload, opts)
       end
 
       SUPPORTED_EVENTS.each do |row|
         define_method("#{row[1]}!") do |*args|
-          error!(row[0], *args)
+          payload = args.shift || ""
+          opts    = args.shift || {}
+          error!(row[0], payload, opts)
         end
       end
 

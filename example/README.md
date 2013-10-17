@@ -33,7 +33,7 @@ Curl is your friend!
     curl -v http://localhost:9292/projects
     
     # Try updating it
-    curl -v -X PUT http://localhost:9292/project/project1 -H "Content-Type: application/json" -d "{\"name\":\"First Updated Project\"}"
+    curl -v -X PATCH http://localhost:9292/project/project1 -H "Content-Type: application/json" -d "{\"name\":\"First Updated Project\"}"
 
     # Finally remove it and check the list is empty
     curl -v -X DELETE http://localhost:9292/project/project1

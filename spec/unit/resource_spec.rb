@@ -224,22 +224,4 @@ describe Restfulness::Resource do
     end
   end
 
-  describe "#error" do
-
-    class Get418Resource < Restfulness::Resource
-      def get
-        error(418, {})
-      end
-    end
-
-    it "should raise a new exception" do
-      klass = Get418Resource
-      obj = klass.new(request, response)
-      expect {
-        obj.get
-      }.to raise_error(Restfulness::HTTPException, "I'm A Teapot")
-    end
-
-  end
-
 end

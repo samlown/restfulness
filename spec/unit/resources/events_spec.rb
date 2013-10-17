@@ -55,11 +55,9 @@ describe Restfulness::Resources::Events do
 
     it "should support bad_request! with paramters" do
       obj.should_receive(:error!).with(400, {:pay => 'load'}, {})
-      expect {
-        obj.instance_eval do
-          bad_request!({:pay => 'load'}, {})
-        end
-      }.to raise_error(Restfulness::HTTPException, "Bad Request")
+      obj.instance_eval do
+        bad_request!({:pay => 'load'}, {})
+      end
     end
 
 

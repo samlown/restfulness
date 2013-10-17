@@ -15,7 +15,7 @@ class ProjectResource < Restfulness::Resource
   def post
     $projects << Project.new(request.params)
   end
-  def put
+  def patch
     project.update(request.params)
   end
   def delete

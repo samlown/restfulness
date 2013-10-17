@@ -27,7 +27,7 @@ module Twitter
       end
 
       desc "Return a personal timeline."
-     get :home_timeline do
+      get :home_timeline do
         authenticate!
         current_user.statuses.limit(20)
       end
@@ -177,6 +177,7 @@ Resources are like Controllers in a Rails project. They handle the basic HTTP ac
  * `get`
  * `head`
  * `post`
+ * `patch`
  * `put`
  * `delete`
  * `options` - this is the only action provded by default
@@ -190,8 +191,8 @@ class ProjectResource < Restfulness::Resource
     project
   end
 
-  # Update the object
-  def put
+  # Update the existing object with some new attributes
+  def patch
     project.update(params)
   end
 
@@ -290,13 +291,13 @@ request.params             # {'key' => 'value'} - usually a JSON deserialized ob
 
 ## Error Handling
 
-If you want your application to return anything other than a 200 (or 202) status, you have a set of different methods that allow you to send a different code back to the client.
+If you want your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.
 
 The easiest method is probably just to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
 
 ```ruby
 class ProjectResource < Restfulness::Resource
-  def put
+  def patch
     if project.update_attributes(request.params)
       project
     else
@@ -307,11 +308,11 @@ class ProjectResource < Restfulness::Resource
 end
 ```
 
-The favourite method in Restfulness however is to use the `HTTPException` class and the selection of helper methods that will raise the error for you. For example:
+The favourite method in Restfulness however is to use the `HTTPException` class and helper methods that will raise the error for you. For example:
 
 ```ruby
 class ProjectResource < Restfulness::Resource
-  def put
+  def patch
     unless project.update_attributes(request.params)
       forbidden!(project.errors)
     end
@@ -325,7 +326,7 @@ The `forbidden!` bang method will call the `error!` method, which in turn will r
 ```ruby
 # Regular resource
 class ProjectResource < ApplicationResource
-  def put
+  def patch
     unless project.update_attributes(request.params)
       forbidden!(project) # only send the project object!
     end
@@ -350,7 +351,7 @@ end
 
 ```
 
-This can be a really nice way to mold your errors into a standard format. All HTTP exceptions on the Resources will pass through the `error!`, even those that a triggered by a callback, so it gives a great way to provide your own more complete result, or even just resort to a simple string.
+This can be a really nice way to mold your errors into a standard format. All HTTP exceptions generated inside resources will pass through `error!`, even those that a triggered by a callback. It gives a great way to provide your own more complete result, or even just resort to a simple string.
 
 The currently built in error methods are:
 
@@ -368,8 +369,8 @@ The currently built in error methods are:
 If you'd like to see me more, please send us a pull request! Failing that, you can create your own by writing something along the lines of:
 
 ```ruby
-def im_a_teapot!(*args)
-  error!(418, *args)
+def im_a_teapot!(payload = "")
+  error!(418, payload)
 end
 ```
 
