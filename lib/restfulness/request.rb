@@ -71,7 +71,7 @@ module Restfulness
       end
     end
 
-    [:get, :post, :put, :delete, :head, :options].each do |m|
+    [:get, :post, :put, :patch, :delete, :head, :options].each do |m|
       define_method("#{m}?") do
         action == m
       end

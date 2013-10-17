@@ -45,6 +45,8 @@ module Restfulness
           :post
         when 'PUT'
           :put
+        when 'PATCH'
+          :patch
         when 'OPTIONS'
           :options
         else

@@ -354,16 +354,16 @@ This can be a really nice way to mold your errors into a standard format. All HT
 
 The currently built in error methods are:
 
- * `not_modified`
- * `bad_request`
- * `unauthorized`
- * `payment_required`
- * `forbidden`
- * `resource_not_found`
- * `request_timeout`
- * `conflict`
- * `gone`
- * `unprocessable_entity`
+ * `not_modified!`
+ * `bad_request!`
+ * `unauthorized!`
+ * `payment_required!`
+ * `forbidden!`
+ * `resource_not_found!`
+ * `request_timeout!`
+ * `conflict!`
+ * `gone!`
+ * `unprocessable_entity!`
 
 If you'd like to see me more, please send us a pull request! Failing that, you can create your own by writing something along the lines of:
 
@@ -420,6 +420,10 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 
 
 ## History
+
+### 0.2.0 - October (pending)
+
+Refactoring error handling and reporting so that it is easier to use and simpler.
 
 ### 0.1.0 - October 16, 2013
 
