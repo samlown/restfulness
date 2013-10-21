@@ -15,11 +15,8 @@ module Restfulness
     end
 
     def run
-      logger.info("Responding to #{request.action.to_s.upcase} #{request.uri.to_s} from #{request.remote_ip}")
-
       route = request.route
       if route
-        logger.info("Using resource: #{route.resource_name}")
         resource = route.build_resource(request, self)
 
         # run callbacks, if any fail, they'll raise an error
@@ -34,13 +31,8 @@ module Restfulness
       end
 
     rescue HTTPException => e # Deal with HTTP exceptions
-      logger.error(e.message)
       headers.update(e.headers)
       update_status_and_payload(e.status, e.payload)
-    end
-
-    def logger
-      Restfulness.logger
     end
 
     protected

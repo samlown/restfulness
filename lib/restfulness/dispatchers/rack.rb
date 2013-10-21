@@ -15,7 +15,6 @@ module Restfulness
         response = Response.new(request)
         response.run
 
-        log_response(response.status)
         [response.status, response.headers, [response.payload || ""]]
       end
 
@@ -56,10 +55,6 @@ module Restfulness
         end
       end
 
-      def log_response(status)
-        logger.info("Completed #{status} #{STATUSES[status]}")
-      end
-
       def prepare_headers(env)
         res = {}
         env.each do |k,v|
@@ -67,10 +62,6 @@ module Restfulness
           res[k.sub(/^HTTP_/, '').downcase.gsub(/-/, '_').to_sym] = v
         end
         res
-      end
-
-      def logger
-        Restfulness.logger
       end
 
     end

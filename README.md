@@ -424,7 +424,7 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 
 ### 0.2.0 - October 17, 2013
 
-Refactoring error handling and reporting so that it is easier to use and simpler.
+Refactoring error handling and reporting so that it is easier to use and simpler. Removing some unnecessary logging stuff.
 
 ### 0.1.0 - October 16, 2013
 
