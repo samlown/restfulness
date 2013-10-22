@@ -422,9 +422,16 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 
 ## History
 
+### 0.2.1 - October 22, 2013
+
+ * Removing some unnecessary logging and using Rack::CommonLogger.
+ * Improving some test coverage. 
+ * Supporting user agent in requests.
+ * Supporting PATCH method in resources.
+
 ### 0.2.0 - October 17, 2013
 
-Refactoring error handling and reporting so that it is easier to use and simpler. Removing some unnecessary logging stuff.
+ * Refactoring error handling and reporting so that it is easier to use and simpler.
 
 ### 0.1.0 - October 16, 2013
 

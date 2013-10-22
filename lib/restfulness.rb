@@ -5,6 +5,7 @@ require 'mono_logger'
 require 'active_support/core_ext'
 require 'active_support/dependencies'
 require 'rack/utils'
+require 'rack/commonlogger'
 require 'rack/showexceptions'
 require 'rack/builder'
 

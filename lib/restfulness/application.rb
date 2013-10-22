@@ -10,7 +10,7 @@ module Restfulness
   #   class MyApp < Restfulness::Application
   #
   #     routes do
-  #       scope 'api' do
+  #       scope 'api' do # scope not supported yet!
   #         add 'journey', JourneyResource
   #         add 'journeys', JourneyCollectionResource
   #       end

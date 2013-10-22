@@ -5,11 +5,8 @@ module Restfulness
     class Rack < Dispatcher
 
       def call(env)
-        rack_req = ::Rack::Request.new(env)
-
         # Make sure we understand the request
-        request = Request.new(app)
-        prepare_request(env, rack_req, request)
+        request = prepare_request(env)
 
         # Prepare a suitable response
         response = Response.new(request)
@@ -20,7 +17,9 @@ module Restfulness
 
       protected
 
-      def prepare_request(env, rack_req, request)
+      def prepare_request(env)
+        rack_req = ::Rack::Request.new(env)
+        request = Request.new(app)
         request.uri        = rack_req.url
         request.action     = parse_action(rack_req.request_method)
         request.query      = rack_req.GET
@@ -32,24 +31,14 @@ module Restfulness
 
         # Sometimes rack removes content type from headers
         request.headers[:content_type] ||= rack_req.content_type
+
+        request
       end
 
       def parse_action(action)
         case action
-        when 'DELETE'
-          :delete
-        when 'GET'
-          :get
-        when 'HEAD'
-          :head
-        when 'POST'
-          :post
-        when 'PUT'
-          :put
-        when 'PATCH'
-          :patch
-        when 'OPTIONS'
-          :options
+        when 'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'OPTIONS'
+          action.downcase.to_sym
         else
           raise HTTPException.new(501)
         end
