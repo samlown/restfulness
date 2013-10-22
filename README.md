@@ -116,7 +116,6 @@ class MyAppAPI < Restfulness::Application
     add 'projects', ProjectsResource
   end
 end
-
 ```
 
 An application is designed to be included in your Rails, Sinatra, or other Rack project, simply include a new instance of your application in the `config.ru` file:
@@ -397,11 +396,12 @@ If you're adding Restfulness to a Rails project, you can take advantage of the `
 ```ruby
 class MyAPI < Restfulness::Application
   if Rails.env.development?
-    middlewares << ActionDispatch::Relaoder
+    middlewares << ActionDispatch::Reloader
   end
   routes do
     # etc. etc.
   end
+end
 ```
 
 We're still working on ways to improve this. If you have any ideas, please send me a pull request!
