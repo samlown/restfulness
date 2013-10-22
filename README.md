@@ -2,6 +2,8 @@
 
 Because REST APIs are all about resources, not routes.
 
+[![Build Status](https://travis-ci.org/samlown/restfulness.png)](https://travis-ci.org/samlown/restfulness)
+
 ## Introduction
 
 Restfulness is an attempt to create a Ruby library that helps create truly REST based APIs to your services. The focus is placed on performing HTTP actions on resources via specific routes, as opposed to the current convention of assigning routes and HTTP actions to methods or blocks of code. The difference is subtle, but makes for a much more natural approach to building APIs.
