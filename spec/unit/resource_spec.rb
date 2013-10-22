@@ -50,7 +50,10 @@ describe Restfulness::Resource do
     it "should return list of supported methods" do
       obj = resource.new(request, response)
       obj.options.should be_nil
-      response.headers['Allow'].should eql('GET, POST, OPTIONS')
+      acts = response.headers['Allow'].split(/, /)
+      ['GET', 'POST', 'OPTIONS'].each do |act|
+        acts.should include(act)
+      end
     end
   end
 
