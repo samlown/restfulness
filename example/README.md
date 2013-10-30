@@ -14,7 +14,7 @@ By default, bundler will expect to find the restfulness gem provided in the pare
 
 ## Running
 
-    bundle exec runit
+    bundle exec rackup
 
 ## Testing
 

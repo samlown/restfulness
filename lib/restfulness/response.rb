@@ -9,6 +9,7 @@ module Restfulness
     # Outgoing data
     attr_reader :status, :headers, :payload
 
+
     def initialize(request)
       @request = request
       @headers = {}
@@ -33,6 +34,10 @@ module Restfulness
     rescue HTTPException => e # Deal with HTTP exceptions
       headers.update(e.headers)
       update_status_and_payload(e.status, e.payload)
+    end
+
+    def content_length
+      payload.to_s.bytesize.to_s
     end
 
     protected
@@ -63,9 +68,8 @@ module Restfulness
       else # Assume text
         headers['Content-Type'] = 'text/plain; charset=utf-8'
       end
-      headers['Content-Length'] = payload.to_s.bytesize.to_s
+      headers['Content-Length'] = content_length
     end
 
   end
-
 end

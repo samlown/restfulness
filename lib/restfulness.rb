@@ -11,7 +11,6 @@ require 'rack/builder'
 
 
 require "restfulness/resources/events"
-require "restfulness/rack/logger"
 
 require "restfulness/application"
 require "restfulness/dispatcher"

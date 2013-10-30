@@ -27,6 +27,7 @@ module Restfulness
         request.body       = rack_req.body
         request.headers    = prepare_headers(env)
 
+        # Useful info
         request.remote_ip  = rack_req.ip
         request.user_agent = rack_req.user_agent
 
