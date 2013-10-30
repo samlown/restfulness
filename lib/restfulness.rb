@@ -11,6 +11,7 @@ require 'rack/builder'
 
 
 require "restfulness/resources/events"
+require "restfulness/rack/logger"
 
 require "restfulness/application"
 require "restfulness/dispatcher"
@@ -26,9 +27,6 @@ require "restfulness/version"
 
 require "restfulness/dispatchers/rack"
 
-require "restfulness/log_formatters/quiet_formatter"
-require "restfulness/log_formatters/verbose_formatter"
-
 module Restfulness
   extend self
 
@@ -36,5 +34,4 @@ module Restfulness
 end
 
 Restfulness.logger = MonoLogger.new(STDOUT)
-Restfulness.logger.formatter = Restfulness::VerboseFormatter.new
 

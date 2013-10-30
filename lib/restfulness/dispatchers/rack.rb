@@ -20,6 +20,7 @@ module Restfulness
       def prepare_request(env)
         rack_req = ::Rack::Request.new(env)
         request = Request.new(app)
+
         request.uri        = rack_req.url
         request.action     = parse_action(rack_req.request_method)
         request.query      = rack_req.GET

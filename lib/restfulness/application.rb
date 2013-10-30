@@ -63,7 +63,7 @@ module Restfulness
       #
       def middlewares
         @middlewares ||= [
-          Rack::CommonLogger,
+          Restfulness::Rack::Logger,
           Rack::ShowExceptions
         ]
       end
