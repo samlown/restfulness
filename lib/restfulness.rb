@@ -1,15 +1,14 @@
 
 require 'uri'
 require 'multi_json'
-require 'mono_logger'
 require 'active_support/core_ext'
 require 'active_support/dependencies'
+require 'active_support/logger'
 require 'rack/utils'
 require 'rack/commonlogger'
 require 'rack/showexceptions'
 require 'rack/builder'
 
-require "restfulness/log_formatters/basic_formatter"
 require "restfulness/resources/events"
 
 require "restfulness/application"
@@ -32,6 +31,5 @@ module Restfulness
   attr_accessor :logger
 end
 
-Restfulness.logger = MonoLogger.new(STDOUT)
-Restfulness.logger.formatter = Restfulness::BasicFormatter.new
+Restfulness.logger = ActiveSupport::Logger.new(STDOUT)
 
