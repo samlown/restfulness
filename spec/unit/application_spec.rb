@@ -32,6 +32,7 @@ describe Restfulness::Application do
   describe "#build_rack_app (protected)" do
     it "should build a new rack app with middlewares" do
       obj = klass.new
+      obj.class.middlewares << Rack::ShowExceptions
       app = obj.send(:build_rack_app)
       app.should be_a(Rack::Builder)
       # Note, this might brake if Rack changes!
@@ -65,9 +66,9 @@ describe Restfulness::Application do
   end
 
   describe ".middlewares" do
-    it "should provide simple array of middlewares" do
+    it "should provide empty array of middlewares" do
       klass.middlewares.should be_a(Array)
-      klass.middlewares.should include(Rack::ShowExceptions)
+      klass.middlewares.should be_empty
     end
   end
 

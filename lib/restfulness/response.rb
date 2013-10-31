@@ -6,6 +6,9 @@ module Restfulness
     # Incoming data
     attr_reader :request
 
+    # The generated resource object
+    attr_reader :resource
+
     # Outgoing data
     attr_reader :status, :headers, :payload
 
@@ -16,9 +19,10 @@ module Restfulness
     end
 
     def run
+      @log_begin_at = Time.now
       route = request.route
       if route
-        resource = route.build_resource(request, self)
+        self.resource = route.build_resource(request, self)
 
         # run callbacks, if any fail, they'll raise an error
         resource.check_callbacks
@@ -34,6 +38,14 @@ module Restfulness
     rescue HTTPException => e # Deal with HTTP exceptions
       headers.update(e.headers)
       update_status_and_payload(e.status, e.payload)
+
+    rescue StandardError, LoadError, SyntaxError => e
+      # Useful coding error handling, with backtrace
+      log_exception(e)
+      update_status_and_payload(500, e.message + "\n")
+
+    ensure
+      log! if status
     end
 
     def content_length
@@ -41,6 +53,10 @@ module Restfulness
     end
 
     protected
+
+    def resource=(obj)
+      @resource = obj
+    end
 
     def update_status_and_payload(status, payload = "")
       self.status  = status
@@ -69,6 +85,35 @@ module Restfulness
         headers['Content-Type'] = 'text/plain; charset=utf-8'
       end
       headers['Content-Length'] = content_length
+    end
+
+    def log!
+      dur = @log_begin_at ? Time.now - @log_begin_at : 0.0
+      uri = request.uri
+
+      resource_name = resource ? resource.class.to_s : 'Error'
+      # We're only interested in parsed parameters.
+      params = request.instance_variable_get(:@params)
+
+      msg = %{%s "%s %s%s" %s %d %s %s %0.4fs %s} % [
+        request.remote_ip,
+        request.action.to_s.upcase,
+        uri.path,
+        uri.query ? "?#{uri.query}" : '',
+        resource_name,
+        status.to_s[0..3],
+        STATUSES[status],
+        content_length,
+        dur,
+        params ? params.inspect : ''
+      ]
+      Restfulness.logger.info(msg)
+    end
+
+    def log_exception(e)
+      string = "#{e.class}: #{e.message}\n"
+      string << e.backtrace.map { |l| "\t#{l}" }.join("\n")
+      Restfulness.logger.error(string)
     end
 
   end

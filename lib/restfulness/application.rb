@@ -62,10 +62,7 @@ module Restfulness
       #    middlewares << ActiveDispatch::Reloader
       #
       def middlewares
-        @middlewares ||= [
-          Rack::CommonLogger,
-          Rack::ShowExceptions
-        ]
+        @middlewares ||= [ ]
       end
 
       # Quick access to the Restfulness logger.

@@ -9,7 +9,7 @@ require 'rack/commonlogger'
 require 'rack/showexceptions'
 require 'rack/builder'
 
-
+require "restfulness/log_formatters/basic_formatter"
 require "restfulness/resources/events"
 
 require "restfulness/application"
@@ -33,4 +33,5 @@ module Restfulness
 end
 
 Restfulness.logger = MonoLogger.new(STDOUT)
+Restfulness.logger.formatter = Restfulness::BasicFormatter.new
 

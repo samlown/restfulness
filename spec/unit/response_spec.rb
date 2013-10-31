@@ -36,6 +36,7 @@ describe Restfulness::Response do
     context "without route" do
       it "should not do anything" do
         request.stub(:route).and_return(nil)
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         obj.run
         obj.status.should eql(404)
         obj.payload.should be_empty
@@ -51,6 +52,7 @@ describe Restfulness::Response do
       it "should try to build resource and run it" do
         request.stub(:route).and_return(route)
         request.action = :get
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         resource.should_receive(:check_callbacks)
         resource.should_receive(:call).and_return({:foo => 'bar'})
@@ -66,6 +68,7 @@ describe Restfulness::Response do
       it "should call resource and set 204 result if no content" do
         request.stub(:route).and_return(route)
         request.action = :get
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         resource.should_receive(:check_callbacks)
         resource.should_receive(:call).and_return(nil)
@@ -78,6 +81,7 @@ describe Restfulness::Response do
       it "should set string content type if payload is a string" do
         request.stub(:route).and_return(route)
         request.action = :get
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         resource.should_receive(:check_callbacks)
         resource.should_receive(:call).and_return("This is a text message")
@@ -96,6 +100,7 @@ describe Restfulness::Response do
       it "should update the status and payload" do
         request.stub(:route).and_return(route)
         request.action = :get
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         txt = "This is a text error"
         resource.stub(:check_callbacks) do
@@ -111,6 +116,7 @@ describe Restfulness::Response do
       it "should update the status and provide JSON payload" do
         request.stub(:route).and_return(route)
         request.action = :get
+        request.stub(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         err = {:error => "This is a text error"}
         resource.stub(:check_callbacks) do
@@ -123,6 +129,22 @@ describe Restfulness::Response do
         obj.payload.should eql(err.to_json)
       end
 
+      context "for non http errors" do
+
+        it "should catch error and provide result" do
+          request.stub(:route).and_return(route)
+          request.action = :get
+          request.stub(:uri).and_return(URI('http://test.com/test'))
+          resource = double(:Resource)
+          resource.stub(:check_callbacks) do
+            raise SyntaxError, 'Bad writing'
+          end
+          route.stub(:build_resource).and_return(resource)
+          obj.run
+          obj.status.should eql(500)
+        end
+
+      end
 
     end
 
