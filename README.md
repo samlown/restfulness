@@ -424,7 +424,7 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 
 ## History
 
-### 0.2.2 - pending
+### 0.2.2 - October 31, 2013
 
  * Refactoring logging support to not depend on Rack CommonLogger nor ShowExceptions.
  * Using ActiveSupport::Logger instead of MonoLogger.
