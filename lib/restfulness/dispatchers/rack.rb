@@ -23,7 +23,6 @@ module Restfulness
 
         request.uri        = rack_req.url
         request.action     = parse_action(rack_req.request_method)
-        request.query      = rack_req.GET
         request.body       = rack_req.body
         request.headers    = prepare_headers(env)
 

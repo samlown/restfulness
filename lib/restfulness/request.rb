@@ -18,15 +18,6 @@ module Restfulness
     # Ruby URI object
     attr_reader :uri
 
-    # Path object of the current URL being accessed
-    attr_accessor :path
-
-    # The route, determined from the path, if available!
-    attr_accessor :route
-
-    # Query parameters included in the URL
-    attr_accessor :query
-
     # Raw HTTP body, for POST and PUT requests.
     attr_accessor :body
 
@@ -56,9 +47,7 @@ module Restfulness
     end
 
     def query
-      @query ||= HashWithIndifferentAccess.new(
-        ::Rack::Utils.parse_nested_query(uri.query)
-      )
+      @query ||= ::Rack::Utils.parse_nested_query(uri.query).with_indifferent_access
     end
 
     def params

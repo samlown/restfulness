@@ -29,7 +29,7 @@ describe Restfulness::Dispatchers::Rack do
     {
       'REQUEST_METHOD'  => 'GET',
       'SCRIPT_NAME'     => '',
-      'PATH_INFO'       => '/projects',
+      'PATH_INFO'       => '/projects?query=test',
       'QUERY_STRING'    => '',
       'SERVER_NAME'     => 'localhost',
       'SERVER_PORT'     => '3000',
@@ -88,11 +88,13 @@ describe Restfulness::Dispatchers::Rack do
 
       req.uri.should be_a(URI)
       req.action.should eql(:get)
-      req.query.should be_empty
       req.body.should be_nil
       req.headers.keys.should include(:x_auth_token)
       req.remote_ip.should eql('192.168.1.23')
       req.user_agent.should eql('Some Navigator')
+
+      req.query.should_not be_empty
+      req.query[:query].should eql('test')
 
       req.headers[:content_type].should eql('application/json')
     end
