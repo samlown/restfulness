@@ -19,12 +19,16 @@ module Restfulness
 
       def prepare_request(env)
         rack_req = ::Rack::Request.new(env)
+
         request = Request.new(app)
 
         request.uri        = rack_req.url
         request.action     = parse_action(rack_req.request_method)
         request.body       = rack_req.body
         request.headers    = prepare_headers(env)
+
+        # Just in case something else got to body first
+        request.body.rewind if request.body.is_a?(StringIO)
 
         # Useful info
         request.remote_ip  = rack_req.ip

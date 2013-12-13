@@ -427,6 +427,7 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 ### 0.2.3 - pending
 
  * Fixing issue where query parameters are set as Hash instead of HashWithIndifferentAccess.
+ * Rewinding the body, incase rails got there first.
 
 ### 0.2.2 - October 31, 2013
 

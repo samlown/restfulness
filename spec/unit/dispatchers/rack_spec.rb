@@ -99,6 +99,22 @@ describe Restfulness::Dispatchers::Rack do
       req.headers[:content_type].should eql('application/json')
     end
 
+    it "should handle the body stringio" do
+      env['rack.input'] = StringIO.new("Some String")
+
+      req = obj.send(:prepare_request, env)
+      req.body.read.should eql('Some String')
+    end
+
+    it "should rewind the body stringio" do
+      env['rack.input'] = StringIO.new("Some String")
+      env['rack.input'].read
+
+      req = obj.send(:prepare_request, env)
+      req.body.read.should eql('Some String')
+    end
+
+
   end
 
 end
