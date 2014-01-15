@@ -106,6 +106,15 @@ describe Restfulness::Request do
         obj.params
       }.to raise_error(Restfulness::HTTPException, "Not Acceptable")
     end
+
+    it "should decode a JSON body with utf-8 encoding" do
+      obj.headers[:content_type] = "application/json; charset=utf-8"
+      obj.body = "{\"foo\":\"bar\"}"
+      expect {
+        obj.params
+      }.not_to raise_error
+    end
+
     it "should decode a JSON body" do
       obj.headers[:content_type] = "application/json"
       obj.body = "{\"foo\":\"bar\"}"
