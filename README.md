@@ -375,6 +375,86 @@ def im_a_teapot!(payload = "")
 end
 ```
 
+## Writing Tests
+Test your application by creating requests and making assertions about the responses.
+
+### RSpec
+Configure `rack-test` to be included in your resource specs. One way to does this would be to create a new file `spec/support/example_groups/restfulness_resource_example_group.rb` with something similar to the following:
+
+```ruby
+module RestfulnessResourceExampleGroup
+  extend ActiveSupport::Concern
+  include Rack::Test::Methods
+
+  # Used by Rack::Test. This could be defined per spec if you have multiple Apps
+  def app
+    My::Api.new
+  end
+  protected :app
+
+  # Set the request content type for a JSON payload
+  def set_content_type_json
+    header('content-type', 'application/json; charset=utf-8')
+  end
+
+  # Helper method to POST a json payload
+  # post(uri, params = {}, env = {}, &block)
+  def post_json(uri, json_data = {}, env = {}, &block)
+    set_content_type_json
+    post(uri, json_data.to_json, &block)
+  end
+
+  included do
+    metadata[:type] = :restfulness_resource
+  end
+
+  # Setup RSpec to include RestfulnessResourceExampleGroup for all specs in given folder(s)
+  RSpec.configure do |config|
+    config.include self,
+      :type => :restfulness_resource,
+      :example_group => { :file_path => %r(spec/resources) }
+  end
+
+  # silence logger
+  Restfulness.logger = Rack::NullLogger.new(My::Api)
+end
+```
+
+Make sure in your `spec_helper` all files in the support folder and sub-directories are being loaded. You should have something like the following:
+```ruby
+Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| require f}
+```
+
+Now you can add a resource spec in the `spec/resources` directory. Here's an example
+
+```ruby
+require 'spec_helper'
+
+describe SessionResource do
+
+  let(:user) { create(:user) }
+
+  context 'GET' do
+    it 'returns 401 if not authorized' do
+      get 'api/session' do |response|
+        expect(response.status).to eq 401
+      end
+    end
+  end
+
+  context 'POST' do
+    it 'returns 200 when request with correct user info' do
+      post_json 'api/session', {:email => user.email, :password => user.password} do |response|
+        expect(response.status).to eq 200
+      end
+    end
+  end
+end
+```
+
+See [Rack::Test](https://github.com/brynary/rack-test) for more information.
+
+A useful gem for making assertions about json objects is [json_spec](https://github.com/collectiveidea/json_spec). This could be included in your `RestfulnessResourceExampleGroup`.
 
 ## Caveats and TODOs
 

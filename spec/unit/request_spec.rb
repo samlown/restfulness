@@ -99,12 +99,25 @@ describe Restfulness::Request do
       obj.stub(:body).and_return(nil)
       obj.params.should be_nil
     end
+
+    it "should raise 400 bad request for invalid json body" do
+      obj.headers[:content_type] = "application/json; charset=utf-8"
+      obj.stub(:body).and_return("invalidjson!")
+      expect {
+        obj.params
+      }.to raise_error(Restfulness::HTTPException, "Bad Request"){ |exception|
+        expect(exception.status).to eq 400
+      }
+    end
+
     it "should raise 406 error if no content type" do
       obj.headers[:content_type] = nil
       obj.body = "{\"foo\":\"bar\"}"
       expect {
         obj.params
-      }.to raise_error(Restfulness::HTTPException, "Not Acceptable")
+      }.to raise_error(Restfulness::HTTPException, "Not Acceptable"){ |exception|
+        expect(exception.status).to eq 406
+      }
     end
 
     it "should decode a JSON body with utf-8 encoding" do

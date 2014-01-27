@@ -53,8 +53,12 @@ module Restfulness
     def params
       return @params if @params || body.nil?
       case headers[:content_type]
-      when /application\/json/
-        @params = MultiJson.decode(body)
+        when /application\/json/
+          begin
+            @params = MultiJson.decode(body)
+          rescue MultiJson::LoadError
+            raise HTTPException.new(400)
+          end
       else
         raise HTTPException.new(406)
       end
