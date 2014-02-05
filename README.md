@@ -556,6 +556,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Fixing issue where query parameters are set as Hash instead of HashWithIndifferentAccess.
  * Rewinding the body, incase rails got there first.
  * Updating the README to describe auto-reloading in Rails projects.
+ * Updated documentation to describe resource testing (@awilliams)
 
 ### 0.2.2 - October 31, 2013
 
