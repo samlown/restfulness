@@ -50,6 +50,10 @@ module Restfulness
       @query ||= ::Rack::Utils.parse_nested_query(uri.query).with_indifferent_access
     end
 
+    def sanitized_query_string
+      @sanitized_query ||= uri.query ? Sanitizer.sanitize_query_string(uri.query) : ''
+    end
+
     def params
       return @params if @params || body.nil?
       case headers[:content_type]
@@ -62,6 +66,11 @@ module Restfulness
       else
         raise HTTPException.new(406)
       end
+    end
+
+    def sanitized_params
+      # Note: this returns empty hash if #params has not been called
+      @sanitized_params ||= @params ? Sanitizer.sanitize_hash(@params) : {}
     end
 
     [:get, :post, :put, :patch, :delete, :head, :options].each do |m|

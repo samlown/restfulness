@@ -93,19 +93,19 @@ module Restfulness
 
       resource_name = resource ? resource.class.to_s : 'Error'
       # We're only interested in parsed parameters.
-      params = request.instance_variable_get(:@params)
+      params = request.sanitized_params
 
       msg = %{%s "%s %s%s" %s %d %s %s %0.4fs %s} % [
         request.remote_ip,
         request.action.to_s.upcase,
         uri.path,
-        uri.query ? "?#{uri.query}" : '',
+        uri.query ? "?#{request.sanitized_query_string}" : '',
         resource_name,
         status.to_s[0..3],
         STATUSES[status],
         content_length,
         dur,
-        params ? params.inspect : ''
+        params.inspect
       ]
       Restfulness.logger.info(msg)
     end

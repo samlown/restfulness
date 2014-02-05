@@ -20,6 +20,7 @@ require "restfulness/resource"
 require "restfulness/response"
 require "restfulness/route"
 require "restfulness/router"
+require "restfulness/sanitizer"
 require "restfulness/statuses"
 require "restfulness/version"
 
@@ -29,6 +30,15 @@ module Restfulness
   extend self
 
   attr_accessor :logger
+
+  # Determine which parameters keys should be filtered in logs, etc
+  def sensitive_params=(params)
+    @sensitive_params = params
+  end
+
+  def sensitive_params
+    @sensitive_params ||= [:password]
+  end
 end
 
 Restfulness.logger = ActiveSupport::Logger.new(STDOUT)
