@@ -450,6 +450,11 @@ If you're using Restfulness as a standalone project, we recommend using a rack e
 
 Restfulness was created by Sam Lown <me@samlown.com> as a solution for building simple APIs at [Cabify](http://www.cabify.com).
 
+The project is now awesome, thanks to contributions by:
+
+ * [Adam Williams](https://github.com/awilliams)
+
+
 ## Caveats and TODOs
 
 Restfulness is still a work in progress but at Cabify we are using it in production. Here is a list of things that we'd like to improve or fix:
