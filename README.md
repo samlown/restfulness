@@ -144,6 +144,8 @@ bundle exec rackup
 
 For a very simple example project, checkout the `/example` directory in the source code.
 
+If you're using Restulfness in a Rails project, you'll want to checkout the Reloading section below.
+
 
 ### Routes
 
@@ -294,7 +296,7 @@ request.params             # {'key' => 'value'} - usually a JSON deserialized ob
 
 If you want your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.
 
-The easiest method is probably just to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
+One of the easiest approaches is to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
 
 ```ruby
 class ProjectResource < Restfulness::Resource
@@ -315,7 +317,7 @@ The favourite method in Restfulness however is to use the `HTTPException` class 
 class ProjectResource < Restfulness::Resource
   def patch
     unless project.update_attributes(request.params)
-      forbidden!(project.errors)
+      forbidden! project.errors
     end
     project
   end
@@ -352,7 +354,7 @@ end
 
 ```
 
-This can be a really nice way to mold your errors into a standard format. All HTTP exceptions generated inside resources will pass through `error!`, even those that a triggered by a callback. It gives a great way to provide your own more complete result, or even just resort to a simple string.
+This can be a really nice way to mold your errors into a standard format. All HTTP exceptions generated inside resources will pass through `error!`, even those that a triggered by a callback. It gives a great way to provide your own JSON error payload, or even just resort to a simple string.
 
 The currently built in error methods are:
 
@@ -367,7 +369,7 @@ The currently built in error methods are:
  * `gone!`
  * `unprocessable_entity!`
 
-If you'd like to see me more, please send us a pull request! Failing that, you can create your own by writing something along the lines of:
+If you'd like to see me more, please send us a pull request. Failing that, you can create your own by writing something along the lines of:
 
 ```ruby
 def im_a_teapot!(payload = "")
@@ -375,38 +377,65 @@ def im_a_teapot!(payload = "")
 end
 ```
 
-
-## Caveats and TODOs
-
-Restfulness is still very much a work in progress. Here is a list of things that we'd like to improve or fix:
-
- * Support for more serializers and content types, not just JSON.
- * Support path methods for automatic URL generation.
- * Support redirect exceptions.
- * Reloading is a PITA (see note below).
- * Needs more functional testing.
- * Support for before and after filters in resources, although I'm slightly aprehensive about this.
-
 ## Reloading
 
-Reloading is complicated. Unfortunately we're all used to the way Rails projects magically reload changed files so you don't have to restart the server after each change.
+We're all used to the way Rails projects magically reload changed files so you don't have to restart the server after each change. Depending on the way you use Restfulness in your project, this can be supported.
 
-If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun).
+### The Rails Way
 
-If you're adding Restfulness to a Rails project, you can take advantage of the `ActionDispatch::Reloader` rack middleware. Simply include it in the application definition:
+Using Restfulness in Rails is definitely the easiest way to take advantage of auto-reloading. Its also pretty straight forward.
+
+The recomended approach is to create two directories in your `/app` path. The `/app/apis` directory can be used for defining your API route files, and `/app/resources` for defining a tree of resource definition files.
+
+Add the two paths to your rails autoloading configuration in `/config/application.rb`, there already be a sample in your config:
 
 ```ruby
-class MyAPI < Restfulness::Application
-  if Rails.env.development?
-    middlewares << ActionDispatch::Reloader
-  end
-  routes do
-    # etc. etc.
-  end
-end
+# Custom directories with classes and modules you want to be autoloadable.
+config.autoload_paths += %W( #{config.root}/app/resources #{config.root}/app/apis )
 ```
 
-We're still working on ways to improve this. If you have any ideas, please send me a pull request!
+Your resources and API routers will now be autoloadable from your Rails project, but we need to update our Rails router to be able to find our API routes. Modify your `/config/routes.rb` file so that it looks something like the following:
+
+```ruby
+YourAppNamespace::Application.routes.draw do
+
+  # Autoreload the API in development
+  if Rails.env.development?
+    mount Api.new => '/api'
+  end
+
+  #.... rest of routes
+end
+
+```
+
+You'll see in the code sample that we're only loading the Restfulness API during development. Our recommendation is to use Restfulness as close to Rack as possible and avoid any of the Rails overhead. To support request in production, you'll need to update your `/config.rb` so that it looks something like the following:
+
+```ruby
+# This file is used by Rack-based servers to start the application.
+
+require ::File.expand_path('../config/environment',  __FILE__)
+
+map = {
+  "/"        => YourAppNameSpace::Application
+}
+
+# In development, we use the Routes to automatically reload
+# the restfulness app when something changes.
+# In production we want to be as close to raw rack as possible.
+unless Rails.env.development?
+  map["/api"] = Api.new
+end
+
+run Rack::URLMap.new(map)
+```
+
+Thats all there is to it! You'll now have auto-reloading in Rails, and fast request handling in production. Just be sure to be careful in development that none of your other Rack middleware interfere with Restfulness. In a new Rails project this certainly won't be an issue.
+
+
+### The Rack Way
+
+If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun).
 
 ## Contributing
 
@@ -421,6 +450,15 @@ We're still working on ways to improve this. If you have any ideas, please send 
 
 Restfulness was created by Sam Lown <me@samlown.com> as a solution for building simple APIs at [Cabify](http://www.cabify.com).
 
+## Caveats and TODOs
+
+Restfulness is still a work in progress but at Cabify we are using it in production. Here is a list of things that we'd like to improve or fix:
+
+ * Support for more serializers and content types, not just JSON.
+ * Support path methods for automatic URL generation.
+ * Support redirect exceptions.
+ * Needs more functional testing.
+ * Support for before and after filters in resources, although I'm slightly aprehensive about this.
 
 ## History
 
@@ -428,6 +466,7 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 
  * Fixing issue where query parameters are set as Hash instead of HashWithIndifferentAccess.
  * Rewinding the body, incase rails got there first.
+ * Updating the README to describe auto-reloading in Rails projects.
 
 ### 0.2.2 - October 31, 2013
 
