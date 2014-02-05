@@ -105,7 +105,7 @@ module Restfulness
         STATUSES[status],
         content_length,
         dur,
-        params.inspect
+        params ? params.inspect : ''
       ]
       Restfulness.logger.info(msg)
     end

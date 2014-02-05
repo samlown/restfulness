@@ -94,6 +94,18 @@ describe Restfulness::Request do
     end
   end
 
+  describe "#sanitized_query_string" do
+    it "should be empty if no query" do
+      obj.uri = "https://example.com/project/12345"
+      obj.sanitized_query_string.should be_empty
+    end
+    it "should filter out bad keys" do # See sanitizer tests for more
+      obj.uri = "https://example.com/project/12345?foo=bar&password=safe"
+      obj.sanitized_query_string.should match(/foo=bar/)
+      obj.sanitized_query_string.should_not match(/password=safe/)
+    end
+  end
+
   describe "#params" do
     it "should not return anything for empty body" do
       obj.stub(:body).and_return(nil)
@@ -132,6 +144,21 @@ describe Restfulness::Request do
       obj.headers[:content_type] = "application/json"
       obj.body = "{\"foo\":\"bar\"}"
       obj.params['foo'].should eql('bar')
+    end
+  end
+
+  describe "#sanitized_params" do
+    it "should provide nil if the params hash has not been used" do
+      obj.stub(:body).and_return(nil)
+      obj.sanitized_params.should be_nil
+    end
+    it "should provide santized params if params have been used" do
+      obj.headers[:content_type] = "application/json"
+      obj.body = "{\"foo\":\"bar\",\"password\":\"safe\"}"
+      obj.params['password'].should eql('safe')
+      obj.sanitized_params['foo'].should eql('bar')
+      obj.sanitized_params['password'].should_not be_blank
+      obj.sanitized_params['password'].should_not eql('safe')
     end
   end
 

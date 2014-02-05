@@ -573,6 +573,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Improved handling of Content-Type header that includes encoding. (@awilliams)
  * Return 400 error when malformed JSON is provided in body (@awilliams)
  * Updated documentation to describe resource testing (@awilliams)
+ * Now supports filtering of sensitive query and parameter request values (@awilliams)
 
 ### 0.2.2 - October 31, 2013
 

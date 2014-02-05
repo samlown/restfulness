@@ -69,8 +69,8 @@ module Restfulness
     end
 
     def sanitized_params
-      # Note: this returns empty hash if #params has not been called
-      @sanitized_params ||= @params ? Sanitizer.sanitize_hash(@params) : {}
+      # Note: this returns nil if #params has not been called
+      @sanitized_params ||= @params ? Sanitizer.sanitize_hash(@params) : nil
     end
 
     [:get, :post, :put, :patch, :delete, :head, :options].each do |m|
