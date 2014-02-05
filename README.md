@@ -292,6 +292,22 @@ request.body               # "{'key':'value'}" - string payload
 request.params             # {'key' => 'value'} - usually a JSON deserialized object
 ```
 
+### Logging
+
+By default, Restfulness uses `ActiveSupport::Logger.new(STDOUT)` as its logger.
+
+To change the logger:
+
+```ruby
+Restfulness.logger = Rack::NullLogger.new(My::Api)
+```
+
+By default, any parameter with key prefix `password` will be sanitized in the log. To change the sensitive parameters:
+
+```ruby
+Restfulness.sensitive_params = [:password, :secretkey]
+```
+
 ## Error Handling
 
 If you want your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.

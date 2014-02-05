@@ -2,7 +2,7 @@ module Restfulness
 
   class Route
 
-    # The path array of eliments, :id always on end!
+    # The path array of elements, :id always on end!
     attr_accessor :path
 
     # Reference to the class that will handle requests for this route
