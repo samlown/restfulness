@@ -379,25 +379,28 @@ end
 
 ## Reloading
 
-We're all used to the way Rails projects magically reload changed files so you don't have to restart the server after each change. Depending on the way you use Restfulness in your project, this can be supported.
+We're all used to the way Rails projects magically reload files so you don't have to restart the server after each change. Depending on the way you use Restfulness in your project, this can be supported.
 
 ### The Rails Way
 
-Using Restfulness in Rails is definitely the easiest way to take advantage of auto-reloading. Its also pretty straight forward.
+Using Restfulness in Rails is the easiest way to take advantage support reloading.
 
-The recomended approach is to create two directories in your `/app` path. The `/app/apis` directory can be used for defining your API route files, and `/app/resources` for defining a tree of resource definition files.
+The recomended approach is to create two directories in your Rails projects `/app` path:
 
-Add the two paths to your rails autoloading configuration in `/config/application.rb`, there already be a sample in your config:
+ * `/app/apis` can be used for defining your API route files, and
+ * `/app/resources` for defining a tree of resource definition files.
+
+Add the two paths to your rails autoloading configuration in `/config/application.rb`, there will already be a sample in your config provided by Rails:
 
 ```ruby
 # Custom directories with classes and modules you want to be autoloadable.
 config.autoload_paths += %W( #{config.root}/app/resources #{config.root}/app/apis )
 ```
 
-Your resources and API routers will now be autoloadable from your Rails project, but we need to update our Rails router to be able to find our API routes. Modify your `/config/routes.rb` file so that it looks something like the following:
+Your Resource and API files will now be autoloadable from your Rails project. The next step is to update our Rails router to be able to find our API. Modify the `/config/routes.rb` file so that it looks something like the following:
 
 ```ruby
-YourAppNamespace::Application.routes.draw do
+YourRailsApp::Application.routes.draw do
 
   # Autoreload the API in development
   if Rails.env.development?
@@ -413,16 +416,11 @@ You'll see in the code sample that we're only loading the Restfulness API during
 
 ```ruby
 # This file is used by Rack-based servers to start the application.
-
 require ::File.expand_path('../config/environment',  __FILE__)
 
 map = {
-  "/"        => YourAppNameSpace::Application
+  "/" => YourRailsApp::Application
 }
-
-# In development, we use the Routes to automatically reload
-# the restfulness app when something changes.
-# In production we want to be as close to raw rack as possible.
 unless Rails.env.development?
   map["/api"] = Api.new
 end
@@ -432,14 +430,14 @@ run Rack::URLMap.new(map)
 
 Thats all there is to it! You'll now have auto-reloading in Rails, and fast request handling in production. Just be sure to be careful in development that none of your other Rack middleware interfere with Restfulness. In a new Rails project this certainly won't be an issue.
 
-
 ### The Rack Way
 
 If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun).
 
+
 ## Writing Tests
 
-Test your application by creating requests and making assertions about the responses.
+Test your application by creating requests to your resources and making assertions about the responses.
 
 ### RSpec
 
@@ -556,6 +554,8 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Fixing issue where query parameters are set as Hash instead of HashWithIndifferentAccess.
  * Rewinding the body, incase rails got there first.
  * Updating the README to describe auto-reloading in Rails projects.
+ * Improved handling of Content-Type header that includes encoding. (@awilliams)
+ * Return 400 error when malformed JSON is provided in body (@awilliams)
  * Updated documentation to describe resource testing (@awilliams)
 
 ### 0.2.2 - October 31, 2013
