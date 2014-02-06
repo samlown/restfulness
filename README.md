@@ -565,7 +565,11 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
-### 0.2.3 - pending
+### 0.2.4 - pending...
+
+ * nothing yet...
+
+### 0.2.3 - February 6, 2014
 
  * Fixing issue where query parameters are set as Hash instead of HashWithIndifferentAccess.
  * Rewinding the body, incase rails got there first.
