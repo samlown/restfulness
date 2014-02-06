@@ -40,6 +40,13 @@ describe Restfulness::Request do
     end
   end
 
+  describe "#action" do
+    it "should provide basic action" do
+      obj.action = :get
+      obj.action.should eql(:get)
+    end
+  end
+
   describe "#path" do
     it "should be nil if there is no route" do
       obj.stub(:route).and_return(nil)

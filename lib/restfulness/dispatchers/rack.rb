@@ -23,7 +23,7 @@ module Restfulness
         request = Request.new(app)
 
         request.uri        = rack_req.url
-        request.action     = parse_action(rack_req.request_method)
+        request.action     = parse_action(env, rack_req.request_method)
         request.body       = rack_req.body
         request.headers    = prepare_headers(env)
 
@@ -40,10 +40,13 @@ module Restfulness
         request
       end
 
-      def parse_action(action)
+      # Given that we need to deal with the action early on, we handle the
+      # HTTP method override header here.
+      def parse_action(env, action)
+        action = (env['HTTP_X_HTTP_METHOD_OVERRIDE'] || action).strip.downcase
         case action
-        when 'DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'OPTIONS'
-          action.downcase.to_sym
+        when 'delete', 'get', 'head', 'post', 'put', 'patch', 'options'
+          action.to_sym
         else
           raise HTTPException.new(501)
         end

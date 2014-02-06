@@ -574,6 +574,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Return 400 error when malformed JSON is provided in body (@awilliams)
  * Updated documentation to describe resource testing (@awilliams)
  * Now supports filtering of sensitive query and parameter request values (@awilliams)
+ * Adding support for X-HTTP-Method-Override header. (@samlown)
 
 ### 0.2.2 - October 31, 2013
 

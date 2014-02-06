@@ -59,15 +59,25 @@ describe Restfulness::Dispatchers::Rack do
     it "should convert main actions to symbols" do
       actions = ['DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'OPTIONS']
       actions.each do |action|
-        val = obj.send(:parse_action, action)
+        val = obj.send(:parse_action, env, action)
         val.should eql(action.downcase.to_sym)
       end
     end
 
     it "should raise error if action unrecognised" do
       expect {
-        obj.send(:parse_action, 'FOOO')
+        obj.send(:parse_action, env, 'FOOO')
       }.to raise_error(Restfulness::HTTPException)
+    end
+
+    it "should override the action if the override header is present" do
+      env['HTTP_X_HTTP_METHOD_OVERRIDE'] = 'PATCH'
+      obj.send(:parse_action, env, 'POST').should eql(:patch)
+    end
+
+    it "should handle junk in action override header" do
+      env['HTTP_X_HTTP_METHOD_OVERRIDE'] = ' PatCH '
+      obj.send(:parse_action, env, 'POST').should eql(:patch)
     end
 
   end
