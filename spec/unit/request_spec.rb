@@ -169,6 +169,17 @@ describe Restfulness::Request do
     end
   end
 
+  describe "#http_accept_language" do
+    it "should provide an instance of Parser" do
+      obj.http_accept_language.should be_a(HttpAcceptLanguage::Parser)
+    end
+    it "should use the accept_language header" do
+      header = "en-us,en-gb;q=0.8,en"
+      obj.headers[:accept_language] = header
+      obj.http_accept_language.header.should eql(header)
+    end
+  end
+
   describe "method helpers" do
     it "should respond to method questions" do
       [:get?, :post?, :put?, :delete?, :head?, :options?].each do |q|

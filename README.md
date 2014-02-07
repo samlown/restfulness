@@ -292,6 +292,30 @@ request.body               # "{'key':'value'}" - string payload
 request.params             # {'key' => 'value'} - usually a JSON deserialized object
 ```
 
+### I18n in Resources
+
+Restfulness uses the [http_accept_language](https://github.com/iain/http_accept_language) to try to automatically handle the `Accept-Language` header coming in from a client. After trying to make a match between the available locales, it will try to automatically set the `I18n.locale`. You can access the http_accept_language parser via the `request.http_accept_language` method.
+
+For most APIs, this should work great, especially for mobile applications where this header is automatically set by the phone. There may however be situations where you need a bit more control. If a user has a preferred language setting for example.
+
+Resources contain two protected methods that can be overwritten if you need more precise control. This is what they look like in the Restfulness code:
+
+```ruby
+protected
+
+def locale
+  request.http_accept_language.compatible_language_from(I18n.available_locales)
+end
+
+def set_locale
+  I18n.locale = locale
+end
+``` 
+
+The `Resource#set_locale` method is called before any of the other callbacks are handled. This is important as it allows the locale to be set before returning any translatable error messages.
+
+Most users will probably just want to override the `Resource#locale` method and provide the appropriate locale for the request. If you are using a User object or similar, double check your authentication process as the default `authorized?` method will be called *after* the locale is prepared.
+
 ### Logging
 
 By default, Restfulness uses `ActiveSupport::Logger.new(STDOUT)` as its logger.
@@ -565,9 +589,9 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
-### 0.2.4 - pending...
+### 0.2.4 - February 7, 2014
 
- * nothing yet...
+ * Added I18n support with the help of the http_accept_language gem. (@samlown)
 
 ### 0.2.3 - February 6, 2014
 

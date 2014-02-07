@@ -9,6 +9,8 @@ require 'rack/commonlogger'
 require 'rack/showexceptions'
 require 'rack/builder'
 
+require 'http_accept_language/parser'
+
 require "restfulness/resources/events"
 
 require "restfulness/application"

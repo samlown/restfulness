@@ -73,6 +73,11 @@ module Restfulness
       @sanitized_params ||= @params ? Sanitizer.sanitize_hash(@params) : nil
     end
 
+    # Provide a wrapper for the http_accept_language parser
+    def http_accept_language
+      @http_accept_language = HttpAcceptLanguage::Parser.new(headers[:accept_language])
+    end
+
     [:get, :post, :put, :patch, :delete, :head, :options].each do |m|
       define_method("#{m}?") do
         action == m

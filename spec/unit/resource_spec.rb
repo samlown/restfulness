@@ -121,13 +121,18 @@ describe Restfulness::Resource do
 
     let :obj do
       request.action = :get
-      obj = resource.new(request, response)
+      resource.new(request, response)
     end
 
     it "should all be good by default" do
       expect {
         obj.check_callbacks
       }.to_not raise_error
+    end
+
+    it "should try to set the locale" do
+      obj.should_receive(:set_locale)
+      obj.check_callbacks
     end
 
     it "should raise error on invalid method" do
@@ -225,6 +230,40 @@ describe Restfulness::Resource do
       end
 
     end
+  end
+
+  describe "Locale handling" do
+
+    let :resource do
+      Class.new(GetPostResource) do
+        def head; nil; end
+        def put; nil; end
+        def delete; nil; end
+      end
+    end
+
+    let :obj do
+      request.headers[:accept_language] = "nl, es, en"
+      request.action = :get
+      resource.new(request, response)
+    end
+
+    describe "#locale" do
+      it "should return acceptable locale" do
+        I18n.available_locales = ['es']
+        obj.send(:locale).should eql(:es)
+      end
+    end
+
+    describe "#set_locale" do
+      it "should set the global locale value" do
+        I18n.available_locales = ['en', 'es']
+        I18n.locale.should_not eql(:es)
+        obj.send(:set_locale)
+        I18n.locale.should eql(:es)
+      end
+    end
+
   end
 
 end

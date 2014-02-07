@@ -51,6 +51,9 @@ module Restfulness
     end
 
     def check_callbacks
+      # Locale Handling
+      set_locale
+
       # Access control
       method_not_allowed! unless method_allowed?
       unauthorized!       unless authorized?
@@ -69,6 +72,14 @@ module Restfulness
     end
 
     protected
+
+    def locale
+      request.http_accept_language.compatible_language_from(I18n.available_locales)
+    end
+
+    def set_locale
+      I18n.locale = locale
+    end
 
     def logger
       Restfulness.logger
