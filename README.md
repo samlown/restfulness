@@ -59,8 +59,10 @@ Restfulness takes a different approach. The following example attempts to show h
 class TwitterAPI < Restfullness::Application
   routes do
     add 'status',             StatusResource
-    add 'timeline', 'public', PublicTimelineResource
-    add 'timeline', 'home',   HomeTimelineResource
+    scope 'timeline' do
+      add 'public', Timelines::PublicResource
+      add 'home',   Timelines::HomeResource
+    end
   end
 end
 
@@ -70,19 +72,21 @@ class StatusResource < Restfulness::Resource
   end
 end
 
-class PublicTimelineResource < Restfulness::Resource
-  def get
-    Status.limit(20)
+module Timelines
+  class PublicResource < Restfulness::Resource
+    def get
+      Status.limit(20)
+    end
   end
-end
 
-# Authentication requires more cowbell, so assume the ApplicationResource is already defined
-class HomeTimelineResource < ApplicationResource
-  def authorized?
-    authenticate!
-  end
-  def get
-    current_user.statuses.limit(20)
+  # Authentication requires more cowbell, so assume the ApplicationResource is already defined
+  class HomeResource < ApplicationResource
+    def authorized?
+      authenticate!
+    end
+    def get
+      current_user.statuses.limit(20)
+    end
   end
 end
 
@@ -156,19 +160,31 @@ The aim of routes in Restfulness are to be stupid simple. These are the basic ru
  * Strings are matched directly.
  * Symbols match anything, and are accessible as path attributes.
  * Every route automically gets an :id parameter at the end, that may or may not have a null value.
+ * Scopes save repeating shared route array entries.
 
 Lets see a few examples:
 
 ```ruby
 routes do
-  # Simple route to access a project, access with:
-  #   * PUT /project
-  #   * GET /project/1234
-  add 'project',  ProjectResource
+  scope 'api' do
+    # Simple route to access a project, access with:
+    #   * PUT /api/project
+    #   * GET /api/project/1234
+    add 'project',  ProjectResource
 
-  # Parameters are also supported.
-  # Access the project id using `request.path[:project_id]`
-  add 'project', :project_id, 'status', ProjectStatusResource
+    # Parameters are also supported.
+    # Access the project id using `request.path[:project_id]`
+    add 'project', :project_id, 'status', ProjectStatusResource
+
+    # Scope's can be embedded
+    scope 'journeys' do
+      add 'active',     Journeys::ActiveResource
+      add 'terminated', Journeys::TerminatedResource
+    end
+    
+    # Add a general purpose list resource *after* scope
+    add 'journeys', Journeys::ListResource
+  end
 end
 ```
 
@@ -588,6 +604,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Support for before and after filters in resources, although I'm slightly aprehensive about this.
 
 ## History
+
+### 0.2.5 - March 7, 2014
+
+ * Added support for scope in routes. (@samlown)
 
 ### 0.2.4 - February 7, 2014
 

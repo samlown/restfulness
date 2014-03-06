@@ -22,7 +22,6 @@ describe Restfulness::Router do
     end
 
     it "should prepare routes with instance eval block" do
-      block = lambda {}
       obj = klass.new do
         @foo = 'bar'
       end
@@ -39,6 +38,47 @@ describe Restfulness::Router do
       route = obj.routes.first
       route.should be_a(Restfulness::Route)
       route.path.should eql(['projects'])
+    end
+  end
+
+  describe "#scope" do
+    it "should append to the current_scope attribute in block and reset" do
+      obj = klass.new
+      subscope = nil # Can't use rspec inside instance eval!
+      obj.scope 'api' do
+        subscope = current_scope
+      end
+      subscope.should eql(['api'])
+      obj.current_scope.should eql([])
+    end 
+
+    it "should add scope properties to add call" do
+      obj = klass.new
+      res = resource
+      obj.scope 'api' do
+        add 'projects', res
+      end
+      route = obj.routes.first
+      route.path.should eql(['api', 'projects'])
+    end
+
+    it "should allow for scopes within scopes" do
+      obj = klass.new
+      res = resource
+      subscope = nil
+      subsubscope = nil
+      obj.scope 'api' do
+        scope 'projects' do
+          add 'active', res
+          subsubscope = current_scope
+        end
+        subscope = current_scope
+      end
+      subsubscope.should eql(['api', 'projects'])
+      subscope.should eql(['api'])
+      obj.current_scope.should eql([])
+      route = obj.routes.first
+      route.path.should eql(['api', 'projects', 'active'])
     end
   end
 
