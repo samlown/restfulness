@@ -618,6 +618,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
+### 0.2.6 - March 7, 2014
+
+ * Support scope block when adding a resource to router. (@samlown)
+
 ### 0.2.5 - March 7, 2014
 
  * Added support for scope in routes. (@samlown)
