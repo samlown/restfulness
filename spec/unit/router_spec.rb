@@ -6,6 +6,9 @@ describe Restfulness::Router do
   class RouterResource < Restfulness::Resource
   end
 
+  class SecondRouterResource < Restfulness::Resource
+  end
+
   let :klass do
     Restfulness::Router
   end
@@ -38,6 +41,18 @@ describe Restfulness::Router do
       route = obj.routes.first
       route.should be_a(Restfulness::Route)
       route.path.should eql(['projects'])
+    end
+    it "should accept block as scope" do
+      obj = klass.new
+      obj.add 'project', RouterResource do
+        add 'examples', SecondRouterResource
+      end
+      route = obj.routes.first
+      route.resource.should eql(RouterResource)
+      route.path.should eql(['project', 'examples'])
+      route = obj.routes.last
+      route.resource.should eql(SecondRouterResource)
+      route.path.should eql(['project'])
     end
   end
 

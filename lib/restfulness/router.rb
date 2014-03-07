@@ -11,7 +11,9 @@ module Restfulness
       instance_eval(&block) if block_given?
     end
 
-    def add(*args)
+    def add(*args, &block)
+      # Do we need to pretend we've been given a scope?
+      scope(*args[0..-2], &block) if block_given?
       routes << Route.new(*(current_scope + args))
     end
 

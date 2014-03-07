@@ -188,6 +188,19 @@ routes do
 end
 ```
 
+The `add` router method can also except a block which will be interpreted as a scope. The following example will provide the same paths as the `journeys` scope and resource defined above. The most important factor to take into account is that the `Journeys::ListResource` will be added to the route **after** the `active` and `terminated` resources. Order is important!
+
+```ruby
+routes do
+  scope 'api' do
+    add 'journeys', Journeys::ListResource do
+      add 'active',     Journeys::ActiveResource
+      add 'terminated', Journeys::TerminatedResource
+    end
+  end
+end
+``` 
+
 
 ### Resources
 
