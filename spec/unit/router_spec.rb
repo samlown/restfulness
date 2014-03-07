@@ -48,10 +48,10 @@ describe Restfulness::Router do
         add 'examples', SecondRouterResource
       end
       route = obj.routes.first
-      route.resource.should eql(RouterResource)
+      route.resource.should eql(SecondRouterResource)
       route.path.should eql(['project', 'examples'])
       route = obj.routes.last
-      route.resource.should eql(SecondRouterResource)
+      route.resource.should eql(RouterResource)
       route.path.should eql(['project'])
     end
   end
