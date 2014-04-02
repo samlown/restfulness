@@ -212,7 +212,7 @@ Resources are like Controllers in a Rails project. They handle the basic HTTP ac
  * `patch`
  * `put`
  * `delete`
- * `options` - this is the only action provded by default
+ * `options` - this is the only action provided by default
 
 When creating your resource, simply define the methods you'd like to use and ensure each has a result:
 
