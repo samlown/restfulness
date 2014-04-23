@@ -331,8 +331,8 @@ request.path[0]            # 'project
 request.path.to_s          # '/project/123456/task/234567'
 request.path               # ['project', '123456', 'task', '234567']
 request.path[:id]          # '234567'
-require.path[:project_id]  # '123456'
-require.path[2]            # 'task'
+request.path[:project_id]  # '123456'
+request.path[2]            # 'task'
 
 # The request query
 request.query              # {:page => 1} - Hash with indifferent access
@@ -617,6 +617,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Support for before and after filters in resources, although I'm slightly aprehensive about this.
 
 ## History
+
+### 0.2.7 - pending
+
+ * Avoid Rack Lint errors by not providing Content-Type or Length in empty responses.
 
 ### 0.2.6 - March 7, 2014
 

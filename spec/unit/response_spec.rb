@@ -40,8 +40,8 @@ describe Restfulness::Response do
         obj.run
         obj.status.should eql(404)
         obj.payload.should be_empty
-        obj.headers['Content-Type'].should match(/text\/plain/)
-        obj.headers['Content-Length'].should eql(0.to_s)
+        obj.headers['Content-Type'].should be_nil
+        obj.headers['Content-Length'].should be_nil
       end
     end
     context "with route" do
@@ -75,7 +75,8 @@ describe Restfulness::Response do
         route.stub(:build_resource).and_return(resource)
         obj.run
         obj.status.should eql(204)
-        obj.headers['Content-Type'].should match(/text\/plain/)
+        obj.headers['Content-Type'].should be_nil
+        obj.headers['Content-Length'].should be_nil
       end
 
       it "should set string content type if payload is a string" do

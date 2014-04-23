@@ -70,10 +70,10 @@ module Restfulness
     def payload=(body)
       if body.nil? || body.is_a?(String)
         @payload = body.to_s
-        update_content_headers(:text)
+        update_content_headers(:text) unless @payload.empty?
       else
         @payload = MultiJson.encode(body)
-        update_content_headers(:json)
+        update_content_headers(:json) unless @payload.empty?
       end
     end
     
