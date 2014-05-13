@@ -246,7 +246,7 @@ Resources also have support for simple set of built-in callbacks. These have sim
 
 The supported callbacks are:
 
- * `exists?` - True by default, not called in create actions like POST.
+ * `exists?` - True by default, not called in create actions like POST or PUT.
  * `authorized?` - True by default, is the current user valid?
  * `allowed?` - True by default, does the current have access to the resource?
  * `last_modified` - The date of last update on the model, only called for GET and HEAD requests. Validated against the `If-Modified-Since` header.
@@ -618,9 +618,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
-### 0.2.7 - pending
+### 0.3.0 - May 13, 2014
 
- * Avoid Rack Lint errors by not providing Content-Type or Length in empty responses.
+ * Possible breaking change: `put` requests no longer check for existing resource via `exists?` callback. (@samlown)
+ * Avoid Rack Lint errors by not providing Content-Type or Length in empty responses. (@samlown)
 
 ### 0.2.6 - March 7, 2014
 

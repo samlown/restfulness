@@ -142,7 +142,7 @@ describe Restfulness::Resource do
       }.to raise_error(Restfulness::HTTPException, "Method Not Allowed")
     end
 
-    [:head, :get, :put, :delete].each do |action|
+    [:head, :get, :patch, :delete].each do |action|
       it "should raise error when not exists for #{action.to_s.upcase}" do
         request.action = action
         obj.stub(:exists?).and_return(false)
@@ -152,7 +152,7 @@ describe Restfulness::Resource do
       end
     end
 
-    [:post].each do |action|
+    [:put, :post].each do |action|
       it "should not check exists? for #{action.to_s.upcase}" do
         obj.request.action = action
         obj.should_not_receive(:exists?)

@@ -60,7 +60,7 @@ module Restfulness
       forbidden!          unless allowed?
 
       # The following callbacks only make sense for certain methods
-      if [:head, :get, :put, :patch, :delete].include?(request.action)
+      if [:head, :get, :patch, :delete].include?(request.action)
         resource_not_found! unless exists?
 
         if [:get, :head].include?(request.action)
