@@ -1,9 +1,9 @@
 
 require 'uri'
 require 'multi_json'
+require 'active_support'
 require 'active_support/core_ext'
 require 'active_support/dependencies'
-require 'active_support/dependencies/autoload'
 require 'active_support/logger'
 require 'rack/utils'
 require 'rack/commonlogger'
