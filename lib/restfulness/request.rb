@@ -58,12 +58,10 @@ module Restfulness
     def params
       return @params if @params || body.nil?
       case headers[:content_type]
-        when /application\/json/
-          begin
-            @params = MultiJson.decode(body)
-          rescue MultiJson::LoadError
-            raise HTTPException.new(400)
-          end
+      when /application\/json/
+        @params = params_from_json(body)
+      when /application\/x\-www\-form\-urlencoded/
+        @params = params_from_form(body) 
       else
         raise HTTPException.new(406)
       end
@@ -83,6 +81,18 @@ module Restfulness
       define_method("#{m}?") do
         action == m
       end
+    end
+
+    protected
+
+    def params_from_json(body)
+      MultiJson.decode(body)
+    rescue MultiJson::LoadError
+      raise HTTPException.new(400)
+    end
+
+    def params_from_form(body)
+      Rack::Utils.parse_query(body)
     end
 
   end

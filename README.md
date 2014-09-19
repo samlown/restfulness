@@ -643,6 +643,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
+### 0.3.2 - pending
+
+ * Added support for application/x-www-form-urlencoded parameter decoding (@samlown)
+
 ### 0.3.1 - September 19, 2014
 
  * Added support for HTTP Basic Authentication, no breaking changes. (@samlown)

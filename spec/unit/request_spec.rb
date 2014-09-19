@@ -152,6 +152,19 @@ describe Restfulness::Request do
       obj.body = "{\"foo\":\"bar\"}"
       obj.params['foo'].should eql('bar')
     end
+
+    it "should decode a WWW Form body" do
+      obj.headers[:content_type] = "application/x-www-form-urlencoded"
+      obj.body = "grant_type=password&username=johndoe&password=A3ddj3w"
+      obj.params['grant_type'].should eql('password')
+      obj.params['username'].should eql('johndoe')
+    end
+
+    it "should deal with empty WWW Form body" do
+      obj.headers[:content_type] = "application/x-www-form-urlencoded"
+      obj.body = ""
+      obj.params.should be_empty
+    end
   end
 
   describe "#sanitized_params" do
