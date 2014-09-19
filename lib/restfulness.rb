@@ -12,7 +12,13 @@ require 'rack/builder'
 
 require 'http_accept_language/parser'
 
+require "restfulness/http_authentication/basic"
+
 require "restfulness/resources/events"
+require "restfulness/resources/authentication"
+
+require "restfulness/requests/authorization"
+require "restfulness/requests/authorization_header"
 
 require "restfulness/application"
 require "restfulness/dispatcher"

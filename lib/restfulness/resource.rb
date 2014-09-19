@@ -2,6 +2,7 @@ module Restfulness
 
   class Resource
     include Resources::Events
+    include Resources::Authentication
 
     attr_reader :request, :response
 

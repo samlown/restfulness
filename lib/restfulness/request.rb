@@ -5,6 +5,7 @@ module Restfulness
   #
   # Currently wraps around the information provided in a Rack Request object.
   class Request
+    include Requests::Authorization
 
     # Who does this request belong to?
     attr_reader :app

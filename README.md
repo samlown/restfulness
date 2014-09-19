@@ -309,6 +309,37 @@ The `Resource#set_locale` method is called before any of the other callbacks are
 Most users will probably just want to override the `Resource#locale` method and provide the appropriate locale for the request. If you are using a User object or similar, double check your authentication process as the default `authorized?` method will be called *after* the locale is prepared.
 
 
+#### Authentication in Resources
+
+Restfulness now provides very basic support for the [HTTP Basic Authentication](http://en.wikipedia.org/wiki/Basic_access_authentication). To use it, simply call the `authenticate_with_http_basic` method in your resource definition.
+
+Here's an example with the authentication details in the code, you'd obviously want to use something a bit more advanced than this in production:
+
+```ruby
+def authorized?
+  authenticate_with_http_basic do |username, password|
+    return (username == 'user' && password == 'pass')
+  end
+  false
+end
+```
+
+The `request` object provided in the resource, described below, provides access to the HTTP `Authorization` header via the `Reqest#authorization` method. If you want to use an alternative authentication method you can use this to extract the details you might need. For example:
+
+```ruby
+def authorized?
+  auth = request.authorization
+  if auth && auth.schema == 'Token'
+    if our_secret_token == auth.params
+      return true
+    end
+  end
+  false
+end
+```
+
+We don't yet provide support for Digest authentication, but your contributions would be more than welcome. Checkout the [HttpAuthentication/basic.rb](https://github.com/samlown/restfulness/blob/master/lib/restfulness/http_authentication/basic.rb) source for an example.
+
 ### Requests
 
 All resource instances have access to a `Request` object via the `#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request: headers, the request URL, path entries, the query, body and/or parameters.
@@ -617,6 +648,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Support for before and after filters in resources, although I'm slightly aprehensive about this.
 
 ## History
+
+### 0.3.1 - September 19, 2014
+
+ * Added support for HTTP Basic Authentication, no breaking changes. (@samlown)
 
 ### 0.3.0 - May 13, 2014
 
