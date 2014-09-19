@@ -318,9 +318,8 @@ Here's an example with the authentication details in the code, you'd obviously w
 ```ruby
 def authorized?
   authenticate_with_http_basic do |username, password|
-    return (username == 'user' && password == 'pass')
+    username == 'user' && password == 'pass'
   end
-  false
 end
 ```
 
@@ -329,12 +328,7 @@ The `request` object provided in the resource, described below, provides access 
 ```ruby
 def authorized?
   auth = request.authorization
-  if auth && auth.schema == 'Token'
-    if our_secret_token == auth.params
-      return true
-    end
-  end
-  false
+  auth && (auth.schema == 'Token') && (auth.params == our_secret_token)
 end
 ```
 
