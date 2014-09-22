@@ -334,6 +334,26 @@ end
 
 We don't yet provide support for Digest authentication, but your contributions would be more than welcome. Checkout the [HttpAuthentication/basic.rb](https://github.com/samlown/restfulness/blob/master/lib/restfulness/http_authentication/basic.rb) source for an example.
 
+Restfulness doesn't make any provisions for requesting authentication from the client as most APIs don't really need to offer this functionality. You can acheive the same effect however by providing the `WWW-Authenticate` header in the response. For example:
+
+```ruby
+def authorized?
+  authorize_with_http_basic || request_authentication
+end
+
+def authorize_with_http_basic
+  authenticate_with_http_basic do |username, password|
+    username == 'user' && password == 'pass'
+  end
+end
+
+def request_authentication
+  response.headers['WWW-Authenticate'] = 'Basic realm="My Realm"'
+  false
+end
+```
+
+
 ### Requests
 
 All resource instances have access to a `Request` object via the `#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request: headers, the request URL, path entries, the query, body and/or parameters.
