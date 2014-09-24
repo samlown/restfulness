@@ -165,6 +165,13 @@ describe Restfulness::Request do
       obj.body = ""
       obj.params.should be_empty
     end
+
+    it "should deal with a StringIO WWW form body" do
+      obj.headers[:content_type] = "application/x-www-form-urlencoded"
+      obj.body = StringIO.new("grant_type=password&username=johndoe&password=A3ddj3w")
+      obj.params['grant_type'].should eql('password')
+      obj.params['username'].should eql('johndoe')
+    end
   end
 
   describe "#sanitized_params" do
