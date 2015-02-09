@@ -667,6 +667,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
  * Added support for application/x-www-form-urlencoded parameter decoding (@samlown)
  * Support for empty StringIOs when accessing Request#params (@samlown)
+ * Fixing at Rack ~> 1.5.0 due to issues with Rack 1.6 (@samlown)
 
 ### 0.3.1 - September 19, 2014
 
