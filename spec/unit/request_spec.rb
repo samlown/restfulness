@@ -116,7 +116,7 @@ describe Restfulness::Request do
   describe "#params" do
     it "should not return anything for empty body" do
       obj.stub(:body).and_return(nil)
-      obj.params.should be_nil
+      obj.params.should be_empty
     end
 
     it "should raise 400 bad request for invalid json body" do
@@ -171,6 +171,18 @@ describe Restfulness::Request do
       obj.body = StringIO.new("grant_type=password&username=johndoe&password=A3ddj3w")
       obj.params['grant_type'].should eql('password')
       obj.params['username'].should eql('johndoe')
+    end
+
+    it "should deal with empty JSON String body" do
+      obj.headers[:content_type] = "application/json"
+      obj.body = ""
+      obj.params.should be_empty
+    end
+
+    it "should deal with empty JSON StringIO body" do
+      obj.headers[:content_type] = "application/json"
+      obj.body = StringIO.new("")
+      obj.params.should be_empty
     end
   end
 

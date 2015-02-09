@@ -663,9 +663,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
-### 0.3.2 - pending
+### 0.3.2 - February 9, 2015
 
  * Added support for application/x-www-form-urlencoded parameter decoding (@samlown)
+ * Support for empty StringIOs when accessing Request#params (@samlown)
 
 ### 0.3.1 - September 19, 2014
 

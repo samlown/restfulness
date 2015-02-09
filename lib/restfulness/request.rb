@@ -56,14 +56,19 @@ module Restfulness
     end
 
     def params
-      return @params if @params || body.nil?
-      case headers[:content_type]
-      when /application\/json/
-        @params = params_from_json(body)
-      when /application\/x\-www\-form\-urlencoded/
-        @params = params_from_form(body) 
-      else
-        raise HTTPException.new(406)
+      @params ||= begin
+        if body.nil? || body.length == 0
+          {}
+        else
+          case headers[:content_type]
+          when /application\/json/
+            @params = params_from_json(body)
+          when /application\/x\-www\-form\-urlencoded/
+            @params = params_from_form(body)
+          else
+            raise HTTPException.new(406)
+          end
+        end
       end
     end
 
