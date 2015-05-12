@@ -663,6 +663,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
+### 0.3.3 - Pending
+
+ * Basic support for handling large request bodies received as Tempfile (@lauramorillo)
+
 ### 0.3.2 - February 9, 2015
 
  * Added support for application/x-www-form-urlencoded parameter decoding (@samlown)
