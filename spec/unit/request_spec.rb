@@ -173,6 +173,16 @@ describe Restfulness::Request do
       obj.params['username'].should eql('johndoe')
     end
 
+    it "should deal with a Tempfile WWW form body" do
+      obj.headers[:content_type] = "application/x-www-form-urlencoded"
+      file = Tempfile.new("params")
+      file.write("grant_type=password&username=johndoe&password=A3ddj3w")
+      file.rewind
+      obj.body = file
+      obj.params['grant_type'].should eql('password')
+      obj.params['username'].should eql('johndoe')
+    end
+
     it "should deal with empty JSON String body" do
       obj.headers[:content_type] = "application/json"
       obj.body = ""
