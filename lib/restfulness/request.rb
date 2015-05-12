@@ -97,8 +97,9 @@ module Restfulness
     end
 
     def params_from_form(body)
-      # Sometimes the body can be a StringIO
-      Rack::Utils.parse_query(body.is_a?(StringIO) ? body.read : body)
+      # Sometimes the body can be a StringIO or a Tempfile
+      content = body.is_a?(StringIO) || body.is_a?(Tempfile) ? body.read : body
+      Rack::Utils.parse_query(content)
     end
 
   end
