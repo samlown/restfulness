@@ -121,11 +121,12 @@ describe Restfulness::Request do
 
     it "should raise 400 bad request for invalid json body" do
       obj.headers[:content_type] = "application/json; charset=utf-8"
-      obj.stub(:body).and_return("invalidjson!")
+      obj.stub(:body).and_return('{"data":"invalid}')
       expect {
         obj.params
       }.to raise_error(Restfulness::HTTPException, "Bad Request"){ |exception|
         expect(exception.status).to eq 400
+        expect(exception.payload).to eq "Invalid JSON in request body"
       }
     end
 

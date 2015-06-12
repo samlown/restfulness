@@ -649,6 +649,7 @@ Restfulness was created by Sam Lown <me@samlown.com> as a solution for building 
 The project is now awesome, thanks to contributions by:
 
  * [Adam Williams](https://github.com/awilliams)
+ * [Laura Morillo](https://github.com/lauramorillo)
 
 
 ## Caveats and TODOs
@@ -659,13 +660,14 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Support path methods for automatic URL generation.
  * Support redirect exceptions.
  * Needs more functional testing.
- * Support for before and after filters in resources, although I'm slightly aprehensive about this.
+ * Support for before and after filters in resources, although I'm slightly apprehensive about this.
 
 ## History
 
 ### 0.3.3 - Pending
 
  * Basic support for handling large request bodies received as Tempfile (@lauramorillo)
+ * Providing human readable payload for invalid JSON.
 
 ### 0.3.2 - February 9, 2015
 

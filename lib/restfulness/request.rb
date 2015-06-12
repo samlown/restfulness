@@ -93,7 +93,7 @@ module Restfulness
     def params_from_json(body)
       MultiJson.decode(body)
     rescue MultiJson::LoadError
-      raise HTTPException.new(400)
+      raise HTTPException.new(400, "Invalid JSON in request body")
     end
 
     def params_from_form(body)
