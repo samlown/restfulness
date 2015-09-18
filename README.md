@@ -6,93 +6,95 @@ Because REST APIs are all about resources, not routes.
 
 ## Introduction
 
-Restfulness is an attempt to create a Ruby library that helps create truly REST based APIs to your services. The focus is placed on performing HTTP actions on resources via specific routes, as opposed to the current convention of assigning routes and HTTP actions to methods or blocks of code. The difference is subtle, but makes for a much more natural approach to building APIs.
+Restfulness is a simple Ruby library for creating REST APIs. Each endpoint defined in the routing configuration refers to a resource class containing HTTP actions and callbacks. When an HTTP request is received, the callbacks are checked, and the appropriate action is called to provide a response.
 
-The current version is very minimal, as it only support JSON content types, and does not have more advanced commonly used HTTP features like sessions or cookies. For most APIs this should be sufficient.
+When creating Restfulness, we had a set of objectives we wanted to achieve:
 
-To try and highlight the diferences between Restfulness and other libraries, lets have a look at a couple of examples.
+ * A true "resource" orientated interface.
+ * Simple routing.
+ * Fast.
+ * JSON only responses.
+ * Take advantage of HTTP flow control using callbacks.
+ * Simple error handling, and "instant abort" exceptions.
 
-[Grape](https://github.com/intridea/grape) is a popular library for creating APIs in a "REST-like" manor. Here is a simplified section of code from their site:
-
-```ruby
-module Twitter
-  class API < Grape::API
-
-    version 'v1', using: :header, vendor: 'twitter'
-    format :json
-
-    resource :statuses do
-
-      desc "Return a public timeline."
-      get :public_timeline do
-        Status.limit(20)
-      end
-
-      desc "Return a personal timeline."
-      get :home_timeline do
-        authenticate!
-        current_user.statuses.limit(20)
-      end
-
-      desc "Return a status."
-      params do
-        requires :id, type: Integer, desc: "Status id."
-      end
-      route_param :id do
-        get do
-          Status.find(params[:id])
-        end
-      end
-
-    end
-
-  end
-end
-
-```
-
-The focus in Grape is to construct an API by building up a route hierarchy where each HTTP action is tied to a specific ruby block. Resources are mentioned, but they're used more for structure or route-seperation, than a meaningful object.
-
-Restfulness takes a different approach. The following example attempts to show how you might provide a similar API:
+Here's a code example of what a rack application might look like
 
 ```ruby
+# The API definition, this matches incoming request paths to resources
 class TwitterAPI < Restfullness::Application
   routes do
-    add 'status',             StatusResource
-    scope 'timeline' do
-      add 'public', Timelines::PublicResource
-      add 'home',   Timelines::HomeResource
+    scope 'tasks' do
+      add 'task',    ItemResource
+      add 'public',  Tasks::PublicResource
+      add 'private', Tasks::PrivateResource
     end
   end
 end
 
-class StatusResource < Restfulness::Resource
-  def get
-    Status.find(request.path[:id])
-  end
-end
+# Modules are always a good idea to group resources
+module Tasks
+  # A simple resource for returning tasks
+  class ItemResource < Restfulness::Resource
+    # Callback to see if task exsists
+    def exists?
+      !!task
+    end
 
-module Timelines
+    # Provide the task, if the #exists? call worked
+    def get
+      task  
+    end
+
+    # Create a new task, this will bypass the #exits? call
+    def post
+      Task.create(request.params)
+    end
+
+    # Update the task, and raise an error with error response if failed
+    def patch
+      task.update_attributes(request.params) || forbidden!(task.errors)
+    end
+
+    protected
+
+    def task
+      @task ||= Task.find(request.path[:id])
+    end
+  end
+
+  # Simple resource that provides list of public tasks, that may be empty
   class PublicResource < Restfulness::Resource
     def get
-      Status.limit(20)
+      Task.public.limit(20)
     end
   end
 
-  # Authentication requires more cowbell, so assume the ApplicationResource is already defined
-  class HomeResource < ApplicationResource
+  # Authorization requires additional code to authenticate the user
+  class PrivateResource < Restfulness::Resource
+    # If this fails, abort and return 401 Unauthorized response
     def authorized?
-      authenticate!
+      !current_user
     end
+
+    # Assuming authorized, attept to load tasks
     def get
-      current_user.statuses.limit(20)
+      current_user.tasks.limit(20)
+    end
+
+    protected
+
+    # Very simple example of authentication
+    def current_user
+      @current_user ||= authenticate_with_http_basic do |username, password|
+        User.authenticate(username, password)
+      end
     end
   end
 end
 
 ```
 
-I, for one, welcome our new resource overloads. They're a clear and consise way of separating logic between different classes, so an individual model has nothing to do with a collection of models, even if the same model may be provided in the result set.
+Checkout the rest of this document for more of the details on the api, integration with your existing apps, and additional features.
 
 
 ## Installation
@@ -159,7 +161,7 @@ The aim of routes in Restfulness are to be stupid simple. These are the basic ru
  * Order is important.
  * Strings are matched directly.
  * Symbols match anything, and are accessible as path attributes.
- * Every route automically gets an :id parameter at the end, that may or may not have a null value.
+ * Every route automatically gets an :id parameter at the end, that may or may not have a null value.
  * Scopes save repeating shared route array entries.
 
 Lets see a few examples:
@@ -204,7 +206,7 @@ end
 
 ### Resources
 
-Resources are like Controllers in a Rails project. They handle the basic HTTP actions using methods that match the same name as the action. The result of an action is serialized into a JSON object automatically. The actions supported by a resource are:
+Resources are like controllers in a Rails project. They handle the basic HTTP actions using methods that match the same name as the action. The result of an action is serialized into a JSON object automatically. The actions supported by a resource are:
 
  * `get`
  * `head`
@@ -286,11 +288,11 @@ end
 
 #### I18n in Resources
 
-Restfulness uses the [http_accept_language](https://github.com/iain/http_accept_language) gem to automatically handle the `Accept-Language` header coming in from a client. After trying to make a match between the available locales, it will automatically set the `I18n.locale`. You can access the http_accept_language parser via the `request.http_accept_language` method.
+Restfulness uses the [http_accept_language](https://github.com/iain/http_accept_language) gem to automatically handle the `Accept-Language` header received from a client. After trying to make a match between the available locales, it will automatically set the `I18n.locale`. You can access the http_accept_language parser via the `request.http_accept_language` method.
 
 For most APIs this should work great, especially for mobile applications where this header is automatically set by the phone. There may however be situations where you need a bit more control. If a user has a preferred language setting for example.
 
-Resources contain two protected methods that can be overwritten if you need more precise control. This is what they look like in the Restfulness code:
+Resources contain two protected methods that can be overwritten. This is what they look like in the Restfulness code:
 
 ```ruby
 protected
@@ -302,16 +304,15 @@ end
 def set_locale
   I18n.locale = locale
 end
-``` 
+```
 
 The `Resource#set_locale` method is called before any of the other callbacks are handled. This is important as it allows the locale to be set before returning any translatable error messages.
 
-Most users will probably just want to override the `Resource#locale` method and provide the appropriate locale for the request. If you are using a User object or similar, double check your authentication process as the default `authorized?` method will be called *after* the locale is prepared.
-
+Most users will probably just want to override the `Resource#locale` method and provide the appropriate locale for the request. If you are using a User object or similar, double check your authentication process as the default `authorized?` method will be called *after* the locale is prepared so that error responses are always in the requested language.
 
 #### Authentication in Resources
 
-Restfulness now provides very basic support for the [HTTP Basic Authentication](http://en.wikipedia.org/wiki/Basic_access_authentication). To use it, simply call the `authenticate_with_http_basic` method in your resource definition.
+Restfulness provides basic support for [HTTP Basic Authentication](http://en.wikipedia.org/wiki/Basic_access_authentication). To use, simply call the `authenticate_with_http_basic` method in your resource definition.
 
 Here's an example with the authentication details in the code, you'd obviously want to use something a bit more advanced than this in production:
 
@@ -332,9 +333,9 @@ def authorized?
 end
 ```
 
-We don't yet provide support for Digest authentication, but your contributions would be more than welcome. Checkout the [HttpAuthentication/basic.rb](https://github.com/samlown/restfulness/blob/master/lib/restfulness/http_authentication/basic.rb) source for an example.
+Digest authentication is not currently supported, but your contributions would be more than welcome. Checkout the [HttpAuthentication/basic.rb](blob/master/lib/restfulness/http_authentication/basic.rb) source for an example.
 
-Restfulness doesn't make any provisions for requesting authentication from the client as most APIs don't really need to offer this functionality. You can acheive the same effect however by providing the `WWW-Authenticate` header in the response. For example:
+Restfulness doesn't make any provisions for requesting authentication from the client as in our experience most APIs don't need to offer this functionality. You can achieve the same effect however by providing the `WWW-Authenticate` header in the response. For example:
 
 ```ruby
 def authorized?
@@ -353,12 +354,11 @@ def request_authentication
 end
 ```
 
-
 ### Requests
 
-All resource instances have access to a `Request` object via the `#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request: headers, the request URL, path entries, the query, body and/or parameters.
+All resource instances have access to a `Request` object via the `Resource#request` method, much like you'd find in a Rails project. It provides access to the details including in the HTTP request: headers, the request URL, path entries, the query, body and/or parameters.
 
-Restfulness takes a slightly different approach to handling paths, queries, and parameters. Rails and Sinatra apps will typically mash everything together into a `params` hash. While this is convenient for most use cases, it makes it much more difficult to separate values from different contexts. The effects of this are most noticable if you've ever used Models Backbone.js or similar Javascript library. By default a Backbone Model will provide attributes without a prefix in the POST body, so to be able to differenciate between query, path and body parameters you need to ignore the extra attributes, or hack a part of your code to re-add a prefix.
+Restfulness takes a slightly different approach to handling paths, queries, and parameters, as each has their own independent method. Rails and Sinatra will typically mash everything together into a `params` hash. While this is convenient for use cases involving a browser, it is less useful for APIs when body parameters should only contain attributes of the model managed by the resource. If you've ever used Models from Backbone.js or similar Javascript library you appreciate this. When saving a Model, Backbone.js assumes by default that attributes will be provided without a prefix in the POST body.
 
 The following key methods are provided in a request object:
 
@@ -387,7 +387,7 @@ request.query[:page]       # 1
 request.body               # "{'key':'value'}" - string payload
 
 # Request params
-request.params             # {'key' => 'value'} - usually a JSON deserialized object
+request.params             # {'key' => 'value'} - usually a JSON de-serialized object
 ```
 
 ### Logging
@@ -408,7 +408,7 @@ Restfulness.sensitive_params = [:password, :secretkey]
 
 ## Error Handling
 
-If you want your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.
+If you'd like your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.
 
 One of the easiest approaches is to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
 
@@ -470,7 +470,7 @@ end
 
 This can be a really nice way to mold your errors into a standard format. All HTTP exceptions generated inside resources will pass through `error!`, even those that a triggered by a callback. It gives a great way to provide your own JSON error payload, or even just resort to a simple string.
 
-The currently built in error methods are:
+The currently built in exception methods are:
 
  * `not_modified!`
  * `bad_request!`
@@ -499,19 +499,19 @@ We're all used to the way Rails projects magically reload files so you don't hav
 
 Using Restfulness in Rails is the easiest way to take advantage support reloading.
 
-The recomended approach is to create two directories in your Rails projects `/app` path:
+The recommended approach is to create two directories in your Rails projects `/app` path:
 
  * `/app/apis` can be used for defining your API route files, and
  * `/app/resources` for defining a tree of resource definition files.
 
-Add the two paths to your rails autoloading configuration in `/config/application.rb`, there will already be a sample in your config provided by Rails:
+Add the two paths to your rails auto-loading configuration in `/config/application.rb`, there will already be a sample in your config provided by Rails:
 
 ```ruby
 # Custom directories with classes and modules you want to be autoloadable.
 config.autoload_paths += %W( #{config.root}/app/resources #{config.root}/app/apis )
 ```
 
-Your Resource and API files will now be autoloadable from your Rails project. The next step is to update our Rails router to be able to find our API. Modify the `/config/routes.rb` file so that it looks something like the following:
+Your Resource and API files will now be auto-loadable from your Rails project. The next step is to update the Rails router to be able to find our API. Modify the `/config/routes.rb` file so that it includes the mount method call:
 
 ```ruby
 YourRailsApp::Application.routes.draw do
@@ -526,7 +526,7 @@ end
 
 ```
 
-You'll see in the code sample that we're only loading the Restfulness API during development. Our recommendation is to use Restfulness as close to Rack as possible and avoid any of the Rails overhead. To support request in production, you'll need to update your `/config.rb` so that it looks something like the following:
+You'll see in the code sample that we're only loading the Restfulness API during development. Our recommendation is to use Restfulness as close to Rack as possible and avoid any of the Rails overhead. To support requests in production, you'll need to update your `/config.rb` so that it looks something like the following:
 
 ```ruby
 # This file is used by Rack-based servers to start the application.
@@ -546,8 +546,7 @@ Thats all there is to it! You'll now have auto-reloading in Rails, and fast requ
 
 ### The Rack Way
 
-If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun).
-
+If you're using Restfulness as a standalone project, we recommend using a rack extension like [Shotgun](https://github.com/rtomayko/shotgun) to automatically reload on changes.
 
 ## Writing Tests
 
