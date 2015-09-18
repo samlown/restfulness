@@ -17,16 +17,18 @@ When creating Restfulness, we had a set of objectives we wanted to achieve:
  * Take advantage of HTTP flow control using callbacks.
  * Simple error handling, and "instant abort" exceptions.
 
-Here's a code example of what a rack application might look like
+Here's a code example of what the restfulness side of a rack application might look like:
 
 ```ruby
 # The API definition, this matches incoming request paths to resources
 class TwitterAPI < Restfullness::Application
   routes do
-    scope 'tasks' do
-      add 'task',    ItemResource
-      add 'public',  Tasks::PublicResource
-      add 'private', Tasks::PrivateResource
+    scope 'api' do
+      add 'task',      Tasks::ItemResource
+      scope 'tasks' do
+        add 'public',  Tasks::PublicResource
+        add 'private', Tasks::PrivateResource
+      end
     end
   end
 end
