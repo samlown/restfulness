@@ -390,6 +390,12 @@ request.body               # "{'key':'value'}" - string payload
 
 # Request params
 request.params             # {'key' => 'value'} - usually a JSON de-serialized object
+
+# Accept header object (nil if none!)
+request.accept.version     # For "Accept: application/vnd.example.api+json;version=3", returns "3"
+
+# Content Type object (nil if none!)
+request.content_type.to_s  # Something like "application/json"
 ```
 
 ### Logging
@@ -669,6 +675,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
  * Basic support for handling large request bodies received as Tempfile (@lauramorillo)
  * Providing human readable payload for invalid JSON.
+ * Added support for Accept and Content-Type header handling. (@samlown)
 
 ### 0.3.2 - February 9, 2015
 

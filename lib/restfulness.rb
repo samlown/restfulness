@@ -20,6 +20,9 @@ require "restfulness/resources/authentication"
 require "restfulness/requests/authorization"
 require "restfulness/requests/authorization_header"
 
+require "restfulness/headers/media_type"
+require "restfulness/headers/accept"
+
 require "restfulness/application"
 require "restfulness/dispatcher"
 require "restfulness/exceptions"

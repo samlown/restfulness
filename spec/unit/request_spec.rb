@@ -113,6 +113,36 @@ describe Restfulness::Request do
     end
   end
 
+  describe "#content_type" do
+    it "should be nil if no content type" do
+      expect(obj.content_type).to be_nil
+    end
+
+    it "should provide a content type object for the request" do
+      obj.headers[:content_type] = "application/json; charset=utf-8"
+      expect(obj.content_type).to be_a(Restfulness::Headers::MediaType)
+      expect(obj.content_type.json?).to be_true
+    end
+
+    it "should cache content_type object" do
+      obj.headers[:content_type] = "application/json"
+      obj.content_type.freeze
+      expect(obj.content_type.frozen?).to be_true
+    end
+  end
+
+  describe "#accept" do
+    it "should be nil if no accept header provided" do
+      expect(obj.accept).to be_nil
+    end
+    it "should provide a accept object for the request" do
+      obj.headers[:accept] = "application/json; version=3"
+      expect(obj.accept).to be_a(Restfulness::Headers::Accept)
+      expect(obj.accept.json?).to be_true
+      expect(obj.accept.version).to eql("3")
+    end
+  end
+
   describe "#params" do
     it "should not return anything for empty body" do
       obj.stub(:body).and_return(nil)

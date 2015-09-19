@@ -55,19 +55,31 @@ module Restfulness
       @sanitized_query ||= uri.query ? Sanitizer.sanitize_query_string(uri.query) : ''
     end
 
+    def accept
+      if headers[:accept]
+        @accept ||= Headers::Accept.new(headers[:accept])
+      end
+    end
+
+    def content_type
+      if headers[:content_type]
+        @content_type ||= Headers::MediaType.new(headers[:content_type])
+      end
+    end
+
     def params
       @params ||= begin
-        if body.nil? || body.length == 0
-          {}
-        else
-          case headers[:content_type]
-          when /application\/json/
-            @params = params_from_json(body)
-          when /application\/x\-www\-form\-urlencoded/
-            @params = params_from_form(body)
+        if !body.nil? && body.length > 0
+          if content_type && content_type.json?
+            params_from_json(body)
+          elsif content_type && content_type.form?
+            params_from_form(body)
           else
+            # Body provided with no or invalid content type
             raise HTTPException.new(406)
           end
+        else
+          {}
         end
       end
     end
