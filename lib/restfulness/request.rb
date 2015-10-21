@@ -69,11 +69,12 @@ module Restfulness
 
     def params
       @params ||= begin
-        if !body.nil? && body.length > 0
+        data = body_to_string || ""
+        if data.length > 0
           if content_type && content_type.json?
-            params_from_json(body)
+            params_from_json(data)
           elsif content_type && content_type.form?
-            params_from_form(body)
+            params_from_form(data)
           else
             # Body provided with no or invalid content type
             raise HTTPException.new(406)
@@ -102,16 +103,27 @@ module Restfulness
 
     protected
 
-    def params_from_json(body)
-      MultiJson.decode(body)
+    def body_to_string
+      unless body.nil?
+        # Sometimes the body can be a StringIO, Tempfile, or some other freakish IO.
+        if body.respond_to?(:read)
+          body.read
+        else
+          body
+        end     
+      else
+        ""
+      end
+    end
+
+    def params_from_json(data)
+      MultiJson.decode(data)
     rescue MultiJson::LoadError
       raise HTTPException.new(400, "Invalid JSON in request body")
     end
 
-    def params_from_form(body)
-      # Sometimes the body can be a StringIO or a Tempfile
-      content = body.is_a?(StringIO) || body.is_a?(Tempfile) ? body.read : body
-      Rack::Utils.parse_query(content)
+    def params_from_form(data)
+      Rack::Utils.parse_query(data)
     end
 
   end

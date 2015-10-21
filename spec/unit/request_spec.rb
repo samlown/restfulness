@@ -23,6 +23,11 @@ describe Restfulness::Request do
   let :resource do
     RequestResource
   end
+
+  # Fake IO class, meant to mimic Puma::NullIO
+  class EmptyIO
+    def read(count = nil, buffer = nil); ""; end
+  end
     
   
   describe "#initialize" do
@@ -223,6 +228,12 @@ describe Restfulness::Request do
     it "should deal with empty JSON StringIO body" do
       obj.headers[:content_type] = "application/json"
       obj.body = StringIO.new("")
+      obj.params.should be_empty
+    end
+
+    it "should handle some crappy IO object" do
+      obj.body = EmptyIO.new()
+      expect(obj.body).to receive(:read)
       obj.params.should be_empty
     end
   end
