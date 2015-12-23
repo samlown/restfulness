@@ -1,11 +1,14 @@
 module Restfulness
 
   # Simple, indpendent, request interface for dealing with the incoming information
-  # in a request. 
+  # in a request.
   #
   # Currently wraps around the information provided in a Rack Request object.
   class Request
     include Requests::Authorization
+
+    # Expose rack env to interact with rack middleware
+    attr_accessor :rack_env
 
     # Who does this request belong to?
     attr_reader :app
@@ -110,7 +113,7 @@ module Restfulness
           body.read
         else
           body
-        end     
+        end
       else
         ""
       end

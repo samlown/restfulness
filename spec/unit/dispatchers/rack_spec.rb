@@ -16,7 +16,7 @@ describe Restfulness::Dispatchers::Rack do
   let :app do
     Class.new(Restfulness::Application) {
       routes do
-        add 'projects', RackExampleResource 
+        add 'projects', RackExampleResource
       end
     }.new
   end
@@ -102,6 +102,7 @@ describe Restfulness::Dispatchers::Rack do
       req.headers.keys.should include(:x_auth_token)
       req.remote_ip.should eql('192.168.1.23')
       req.user_agent.should eql('Some Navigator')
+      req.rack_env.should be env
 
       req.query.should_not be_empty
       req.query[:query].should eql('test')
