@@ -8,7 +8,7 @@ module Restfulness
     include Requests::Authorization
 
     # Expose rack env to interact with rack middleware
-    attr_accessor :rack_env
+    attr_accessor :env
 
     # Who does this request belong to?
     attr_reader :app

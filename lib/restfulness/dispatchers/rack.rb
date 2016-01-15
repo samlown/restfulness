@@ -21,8 +21,8 @@ module Restfulness
         rack_req = ::Rack::Request.new(env)
 
         request = Request.new(app)
-        request.rack_env = env
 
+        request.env        = env # Reference to Rack env
         request.uri        = rack_req.url
         request.action     = parse_action(env, rack_req.request_method)
         request.body       = rack_req.body
