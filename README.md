@@ -677,6 +677,9 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Providing human readable payload for invalid JSON.
  * Added support for Accept and Content-Type header handling. (@samlown)
  * Better handling of IO objects from `rack.input`, such as `Puma::NullIO`. (@samlown)
+ * Upgrading to latest version of RSpec (@samlown)
+ * Adding `request.env` accessor to Rack env (@amuino)
+ * Removing support for Ruby 1.9 (@samlown)
 
 ### 0.3.2 - February 9, 2015
 
