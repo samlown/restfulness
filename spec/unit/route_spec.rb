@@ -18,23 +18,23 @@ describe Restfulness::Route do
 
     it "should assign basic path and resource" do
       obj = klass.new('project', resource)
-      obj.path.should eql(['project'])
-      obj.resource_name.should eql(resource.to_s)
+      expect(obj.path).to eql(['project'])
+      expect(obj.resource_name).to eql(resource.to_s)
     end
 
     it "should assign path with symbols" do
       obj = klass.new('project', :project_id, 'states', resource)
-      obj.path.should eql(['project', :project_id, 'states']) 
+      expect(obj.path).to eql(['project', :project_id, 'states']) 
     end
 
     it "should remove :id from end" do
       obj = klass.new('project', :project_id, 'states', :id, resource)
-      obj.path.should eql(['project', :project_id, 'states'])
+      expect(obj.path).to eql(['project', :project_id, 'states'])
     end
 
     it "should handle numbers in path" do
       obj = klass.new('project', 120, resource)
-      obj.path.should eql(['project', 120])
+      expect(obj.path).to eql(['project', 120])
     end
 
     it "should accept classes as strings" do
@@ -60,7 +60,7 @@ describe Restfulness::Route do
   describe "#resource" do
     it "should provide constant to class" do
       obj = klass.new('project', resource)
-      obj.resource.should eql(resource)
+      expect(obj.resource).to eql(resource)
     end
   end
 
@@ -68,8 +68,8 @@ describe Restfulness::Route do
     it "should build a new path object including self" do
       obj = klass.new('project', resource)
       path = obj.build_path("/project/12345")
-      path.should be_a(Restfulness::Path)
-      path.route.should eql(obj)
+      expect(path).to be_a(Restfulness::Path)
+      expect(path.route).to eql(obj)
     end
   end
 
@@ -80,16 +80,16 @@ describe Restfulness::Route do
         klass.new('project', resource)
       end
       it "should return true for match" do
-        obj.handles?(['project']).should be_true
+        expect(obj.handles?(['project'])).to be true
       end
       it "should return true for match with id" do
-        obj.handles?(['project', '12345']).should be_true
+        expect(obj.handles?(['project', '12345'])).to be true
       end
       it "should return false for different name" do
-        obj.handles?(['projects']).should be_false
+        expect(obj.handles?(['projects'])).to be false
       end
       it "should return false for matching start" do
-        obj.handles?(['project', '12345', 'status']).should be_false
+        expect(obj.handles?(['project', '12345', 'status'])).to be false
       end
     end
 
@@ -98,13 +98,13 @@ describe Restfulness::Route do
         klass.new(resource)
       end
       it "should matching empty path" do
-        obj.handles?([]).should be_true
+        expect(obj.handles?([])).to be true
       end
       it "should matching empty path with id" do
-        obj.handles?(['12345']).should be_true
+        expect(obj.handles?(['12345'])).to be true
       end
       it "shold not match extended URL" do
-        obj.handles?(['foobar', '12345']).should be_false
+        expect(obj.handles?(['foobar', '12345'])).to be false
       end
     end
 
@@ -113,13 +113,13 @@ describe Restfulness::Route do
         klass.new(:project_id, resource)
       end
       it "should matching anything" do
-        obj.handles?(['foobar']).should be_true
+        expect(obj.handles?(['foobar'])).to be true
       end
       it "should matching anything, with id" do
-        obj.handles?(['foobar', '12345']).should be_true
+        expect(obj.handles?(['foobar', '12345'])).to be true
       end
       it "shold not match extended URL" do
-        obj.handles?(['foobar', 'status', '12345']).should be_false
+        expect(obj.handles?(['foobar', 'status', '12345'])).to be false
       end
     end
 
@@ -128,19 +128,19 @@ describe Restfulness::Route do
         klass.new('project', :project_id, 'status', resource)
       end
       it "should return true for match" do
-        obj.handles?(['project', '1234', 'status']).should be_true
+        expect(obj.handles?(['project', '1234', 'status'])).to be true
       end
       it "should return true for match with id" do
-        obj.handles?(['project', '1234', 'status', '12345']).should be_true
+        expect(obj.handles?(['project', '1234', 'status', '12345'])).to be true
       end
       it "should not match short path" do
-        obj.handles?(['project']).should be_false
+        expect(obj.handles?(['project'])).to be false
       end
       it "should not match path with different name" do
-        obj.handles?(['project', '12345', 'statuses']).should be_false
+        expect(obj.handles?(['project', '12345', 'statuses'])).to be false
       end
       it "should not match extended path" do
-        obj.handles?(['project', '12345', 'status', '1234', 'test']).should be_false
+        expect(obj.handles?(['project', '12345', 'status', '1234', 'test'])).to be false
       end
 
     end
@@ -151,7 +151,7 @@ describe Restfulness::Route do
 
     it "should request a new resource" do
       obj = klass.new('project', resource)
-      resource.should_receive(:new).with({}, {}).and_return(nil)
+      expect(resource).to receive(:new).with({}, {}).and_return(nil)
       obj.build_resource({}, {})
     end
 

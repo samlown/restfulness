@@ -5,7 +5,7 @@ require 'bundler/setup'
 require 'restfulness' # and any other gems you need
 
 RSpec.configure do |config|
-  config.color_enabled = true
+  config.color = true
 
   # Avoid deprication messages with this:
   I18n.config.enforce_available_locales = false

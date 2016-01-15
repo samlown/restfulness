@@ -28,8 +28,8 @@ describe Restfulness::Resources::Authentication do
       obj = AuthResource.new(request, response)
       expect { |b| obj.authenticate_with_http_basic(&b) }.to yield_control
       obj.authenticate_with_http_basic do |username, password|
-        username.should eql('Aladdin')
-        password.should eql('open sesame')
+        expect(username).to eql('Aladdin')
+        expect(password).to eql('open sesame')
       end
     end
 

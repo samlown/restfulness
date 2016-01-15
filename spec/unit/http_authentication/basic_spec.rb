@@ -15,25 +15,25 @@ describe Restfulness::HttpAuthentication::Basic do
   describe "#initialize" do
     it "should set the header" do
       obj = klass.new(header)
-      obj.header.should eql(header)
+      expect(obj.header).to eql(header)
     end
   end
 
   describe "#valid?" do
     it "should detect valid schema and credentials" do
       obj = klass.new(header)
-      obj.valid?.should be_true
+      expect(obj.valid?).to be true
     end
 
     it "should reject different schema" do
       obj = klass.new(header_klass.new("Fooo Bar"))
-      obj.valid?.should be_false
+      expect(obj.valid?).to be false
     end
 
     it "should reject if the basic request credentials are of invalid length" do
       creds = ::Base64.strict_encode64("username")
       obj = klass.new(header_klass.new("Fooo #{creds}"))
-      obj.valid?.should be_false
+      expect(obj.valid?).to be false
     end
   end
 
@@ -41,9 +41,9 @@ describe Restfulness::HttpAuthentication::Basic do
 
     it "should decode and prepare the params" do
       obj = klass.new(header)
-      obj.credentials.length.should eql(2)
-      obj.username.should eql('Aladdin')
-      obj.password.should eql('open sesame')
+      expect(obj.credentials.length).to eql(2)
+      expect(obj.username).to eql('Aladdin')
+      expect(obj.password).to eql('open sesame')
     end
 
   end

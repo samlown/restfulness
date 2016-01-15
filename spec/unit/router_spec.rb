@@ -21,14 +21,14 @@ describe Restfulness::Router do
 
     it "should prepare routes" do
       obj = klass.new
-      obj.routes.should eql([])
+      expect(obj.routes).to eql([])
     end
 
     it "should prepare routes with instance eval block" do
       obj = klass.new do
         @foo = 'bar'
       end
-      obj.instance_variable_get(:@foo).should eql('bar')
+      expect(obj.instance_variable_get(:@foo)).to eql('bar')
     end
 
   end
@@ -37,10 +37,10 @@ describe Restfulness::Router do
     it "should add route to object" do
       obj = klass.new
       obj.add 'projects', resource
-      obj.routes.length.should eql(1)
+      expect(obj.routes.length).to eql(1)
       route = obj.routes.first
-      route.should be_a(Restfulness::Route)
-      route.path.should eql(['projects'])
+      expect(route).to be_a(Restfulness::Route)
+      expect(route.path).to eql(['projects'])
     end
     it "should accept block as scope" do
       obj = klass.new
@@ -48,11 +48,11 @@ describe Restfulness::Router do
         add 'examples', SecondRouterResource
       end
       route = obj.routes.first
-      route.resource.should eql(SecondRouterResource)
-      route.path.should eql(['project', 'examples'])
+      expect(route.resource).to eql(SecondRouterResource)
+      expect(route.path).to eql(['project', 'examples'])
       route = obj.routes.last
-      route.resource.should eql(RouterResource)
-      route.path.should eql(['project'])
+      expect(route.resource).to eql(RouterResource)
+      expect(route.path).to eql(['project'])
     end
   end
 
@@ -63,8 +63,8 @@ describe Restfulness::Router do
       obj.scope 'api' do
         subscope = current_scope
       end
-      subscope.should eql(['api'])
-      obj.current_scope.should eql([])
+      expect(subscope).to eql(['api'])
+      expect(obj.current_scope).to eql([])
     end 
 
     it "should add scope properties to add call" do
@@ -74,7 +74,7 @@ describe Restfulness::Router do
         add 'projects', res
       end
       route = obj.routes.first
-      route.path.should eql(['api', 'projects'])
+      expect(route.path).to eql(['api', 'projects'])
     end
 
     it "should allow for scopes within scopes" do
@@ -89,11 +89,11 @@ describe Restfulness::Router do
         end
         subscope = current_scope
       end
-      subsubscope.should eql(['api', 'projects'])
-      subscope.should eql(['api'])
-      obj.current_scope.should eql([])
+      expect(subsubscope).to eql(['api', 'projects'])
+      expect(subscope).to eql(['api'])
+      expect(obj.current_scope).to eql([])
       route = obj.routes.first
-      route.path.should eql(['api', 'projects', 'active'])
+      expect(route.path).to eql(['api', 'projects', 'active'])
     end
   end
 
@@ -110,47 +110,47 @@ describe Restfulness::Router do
 
     it "should determine the route for a simple path" do
       route = obj.route_for("/projects")
-      route.should_not be_nil
-      route.path.should eql(['projects'])
+      expect(route).not_to be_nil
+      expect(route.path).to eql(['projects'])
     end
 
     it "should determine the route for a simple path with id" do
       route = obj.route_for("/projects")
-      route.should_not be_nil
-      route.path.should eql(['projects'])
+      expect(route).not_to be_nil
+      expect(route.path).to eql(['projects'])
     end
 
     it "should determine the route for a simple path with id and end /" do
       route = obj.route_for("/projects/12345/")
-      route.should_not be_nil
-      route.path.should eql(['projects'])
+      expect(route).not_to be_nil
+      expect(route.path).to eql(['projects'])
     end
 
     it "should determine the route for a simple path with end /" do
       route = obj.route_for("/projects/")
-      route.should_not be_nil
-      route.path.should eql(['projects'])
+      expect(route).not_to be_nil
+      expect(route.path).to eql(['projects'])
     end
 
     it "should determine route for more complex path" do
       route = obj.route_for("/project/1235/status/1234")
-      route.should_not be_nil
-      route.path.should eql(['project', :project_id, 'status'])
+      expect(route).not_to be_nil
+      expect(route.path).to eql(['project', :project_id, 'status'])
     end
 
     it "should return nil if not matched" do
       route = obj.route_for("/projects/1235/statuses/")
-      route.should be_nil
+      expect(route).to be_nil
     end
 
     it "should match empty path" do
       route = obj.route_for("/")
-      route.path.should eql([])
+      expect(route.path).to eql([])
     end
 
     it "should match path with single parameter" do
       route = obj.route_for("/something")
-      route.path.should eql([:page])
+      expect(route.path).to eql([:page])
     end
   end
 

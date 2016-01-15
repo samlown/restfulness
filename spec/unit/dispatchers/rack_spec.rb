@@ -46,9 +46,9 @@ describe Restfulness::Dispatchers::Rack do
 
     it "should handle basic call and return response" do
       res = obj.call(env)
-      res[0].should eql(200)
-      res[1].should be_a(Hash)
-      res[2].first.should eql('rack_example_result')
+      expect(res[0]).to eql(200)
+      expect(res[1]).to be_a(Hash)
+      expect(res[2].first).to eql('rack_example_result')
     end
 
 
@@ -60,7 +60,7 @@ describe Restfulness::Dispatchers::Rack do
       actions = ['DELETE', 'GET', 'HEAD', 'POST', 'PUT', 'PATCH', 'OPTIONS']
       actions.each do |action|
         val = obj.send(:parse_action, env, action)
-        val.should eql(action.downcase.to_sym)
+        expect(val).to eql(action.downcase.to_sym)
       end
     end
 
@@ -72,12 +72,12 @@ describe Restfulness::Dispatchers::Rack do
 
     it "should override the action if the override header is present" do
       env['HTTP_X_HTTP_METHOD_OVERRIDE'] = 'PATCH'
-      obj.send(:parse_action, env, 'POST').should eql(:patch)
+      expect(obj.send(:parse_action, env, 'POST')).to eql(:patch)
     end
 
     it "should handle junk in action override header" do
       env['HTTP_X_HTTP_METHOD_OVERRIDE'] = ' PatCH '
-      obj.send(:parse_action, env, 'POST').should eql(:patch)
+      expect(obj.send(:parse_action, env, 'POST')).to eql(:patch)
     end
 
   end
@@ -86,8 +86,8 @@ describe Restfulness::Dispatchers::Rack do
 
     it "should parse headers from environment" do
       res = obj.send(:prepare_headers, env)
-      res[:content_type].should eql('application/json')
-      res[:x_auth_token].should eql('foobartoken')
+      expect(res[:content_type]).to eql('application/json')
+      expect(res[:x_auth_token]).to eql('foobartoken')
     end
   end
 
@@ -96,25 +96,25 @@ describe Restfulness::Dispatchers::Rack do
     it "should prepare request object with main fields" do
       req = obj.send(:prepare_request, env)
 
-      req.uri.should be_a(URI)
-      req.action.should eql(:get)
-      req.body.should be_nil
-      req.headers.keys.should include(:x_auth_token)
-      req.remote_ip.should eql('192.168.1.23')
-      req.user_agent.should eql('Some Navigator')
-      req.env.should be env
+      expect(req.uri).to be_a(URI)
+      expect(req.action).to eql(:get)
+      expect(req.body).to be_nil
+      expect(req.headers.keys).to include(:x_auth_token)
+      expect(req.remote_ip).to eql('192.168.1.23')
+      expect(req.user_agent).to eql('Some Navigator')
+      expect(req.env).to be env
 
-      req.query.should_not be_empty
-      req.query[:query].should eql('test')
+      expect(req.query).not_to be_empty
+      expect(req.query[:query]).to eql('test')
 
-      req.headers[:content_type].should eql('application/json')
+      expect(req.headers[:content_type]).to eql('application/json')
     end
 
     it "should handle the body stringio" do
       env['rack.input'] = StringIO.new("Some String")
 
       req = obj.send(:prepare_request, env)
-      req.body.read.should eql('Some String')
+      expect(req.body.read).to eql('Some String')
     end
 
     it "should rewind the body stringio" do
@@ -122,7 +122,7 @@ describe Restfulness::Dispatchers::Rack do
       env['rack.input'].read
 
       req = obj.send(:prepare_request, env)
-      req.body.read.should eql('Some String')
+      expect(req.body.read).to eql('Some String')
     end
 
 

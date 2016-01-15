@@ -17,14 +17,14 @@ describe Restfulness::Requests::Authorization do
 
     it "should be nil if no authorization header resent" do
       auth = request.authorization
-      auth.should be_nil
+      expect(auth).to be_nil
     end
  
     it "should build new authorization header when present" do
       request.headers[:authorization] = "Basic QWxhZGRpbjpvcGVuIHNlc2FtZQ=="
       auth = request.authorization
-      auth.should be_a(Restfulness::Requests::AuthorizationHeader)
-      auth.schema.should eql("Basic")
+      expect(auth).to be_a(Restfulness::Requests::AuthorizationHeader)
+      expect(auth.schema).to eql("Basic")
     end
 
  end

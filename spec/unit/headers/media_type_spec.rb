@@ -152,17 +152,17 @@ describe Restfulness::Headers::MediaType do
       
       it "should compare matching strings" do
         obj = klass.new("application/json")
-        expect(obj == "application/json").to be_true
+        expect(obj == "application/json").to be true
       end
 
       it "should fail on non-matching strings" do
         obj = klass.new("application/xhtml+xml")
-        expect(obj == "application/xml").to be_false
+        expect(obj == "application/xml").to be false
       end
 
       it "should ignore whitespace" do
         obj = klass.new("application/json;version=1")
-        expect(obj == "application/json; version=1").to be_true
+        expect(obj == "application/json; version=1").to be true
       end
 
     end
@@ -172,19 +172,19 @@ describe Restfulness::Headers::MediaType do
       it "should compare matching objs" do
         obj = klass.new("application/json")
         obj2 = klass.new("application/json")
-        expect(obj == obj2).to be_true
+        expect(obj == obj2).to be true
       end
 
       it "should compare non-matching objs" do
         obj = klass.new("application/json")
         obj2 = klass.new("application/xml")
-        expect(obj == obj2).to be_false
+        expect(obj == obj2).to be false
       end
 
       it "should compare complex objects" do
         obj = klass.new("application/vnd.example.com.user+json;version=1")
         obj2 = klass.new("application/vnd.example.com.user+json;version=1")
-        expect(obj == obj2).to be_true
+        expect(obj == obj2).to be true
       end
      
     end
@@ -217,44 +217,44 @@ describe Restfulness::Headers::MediaType do
 
     it "should should match basic json type" do
       obj = klass.new("application/json; version=2")
-      expect(obj.json?).to be_true
+      expect(obj.json?).to be true
     end
 
     it "should should match vendored json type" do
       obj = klass.new("application/vnd.example.com.user+json; version=2")
-      expect(obj.json?).to be_true
+      expect(obj.json?).to be true
     end
 
     it "should should match basic xml type" do
       obj = klass.new("application/xml")
-      expect(obj.json?).to be_false
-      expect(obj.xml?).to be_true
+      expect(obj.json?).to be false
+      expect(obj.xml?).to be true
     end
 
     it "should should match vendored json type" do
       obj = klass.new("application/vnd.example.com.user+xml; version=2")
-      expect(obj.json?).to be_false
-      expect(obj.xml?).to be_true
+      expect(obj.json?).to be false
+      expect(obj.xml?).to be true
     end
 
     it "should match text type" do
       obj = klass.new("text/plain")
-      expect(obj.text?).to be_true
+      expect(obj.text?).to be true
     end
 
     it "should not match non-text type" do
       obj = klass.new("application/json")
-      expect(obj.text?).to be_false
+      expect(obj.text?).to be false
     end
 
     it "should match form type" do
       obj = klass.new("application/x-www-form-urlencoded")
-      expect(obj.form?).to be_true
+      expect(obj.form?).to be true
     end
 
     it "should not match non-text type" do
       obj = klass.new("application/json")
-      expect(obj.form?).to be_false
+      expect(obj.form?).to be false
     end
 
   end

@@ -25,25 +25,25 @@ describe Restfulness::Path do
     
     it "should assign route" do
       obj = klass.new(simple_route, '/project')
-      obj.route.should eql(simple_route)
+      expect(obj.route).to eql(simple_route)
     end
 
     context "simple paths" do
       it "should prepare basic path" do
         obj = klass.new(simple_route, '/project')
-        obj.components.should eql(['project'])
-        obj.params[:id].should be_nil
+        expect(obj.components).to eql(['project'])
+        expect(obj.params[:id]).to be_nil
       end
 
       it "should prepare irregular path components" do
         obj = klass.new(simple_route, '/project/')
-        obj.components.should eql(['project'])
+        expect(obj.components).to eql(['project'])
       end
 
       it "should include id" do
         obj = klass.new(simple_route, '/project/12345')
-        obj.components.should eql(['project', '12345'])
-        obj.params[:id].should eql('12345')
+        expect(obj.components).to eql(['project', '12345'])
+        expect(obj.params[:id]).to eql('12345')
       end
     end
 
@@ -51,15 +51,15 @@ describe Restfulness::Path do
     context "complex paths" do
       it "should prepare path" do
         obj = klass.new(complex_route, '/project/12345/status')
-        obj.components.should eql(['project', '12345', 'status'])
-        obj.params[:project_id].should eql('12345')
+        expect(obj.components).to eql(['project', '12345', 'status'])
+        expect(obj.params[:project_id]).to eql('12345')
       end
 
       it "should handle end id" do
         obj = klass.new(complex_route, '/project/12345/status/23456')
-        obj.components.should eql(['project', '12345', 'status', '23456'])
-        obj.params[:project_id].should eql('12345')
-        obj.params[:id].should eql('23456')
+        expect(obj.components).to eql(['project', '12345', 'status', '23456'])
+        expect(obj.params[:project_id]).to eql('12345')
+        expect(obj.params[:id]).to eql('23456')
       end
     end
   end
@@ -67,7 +67,7 @@ describe Restfulness::Path do
   describe "#to_s" do
     it "should provide simple string" do
       obj = klass.new(complex_route, '/project/12345/status/23456')
-      obj.to_s.should eql('/project/12345/status/23456')
+      expect(obj.to_s).to eql('/project/12345/status/23456')
     end
   end
 
@@ -76,15 +76,15 @@ describe Restfulness::Path do
       obj = klass.new(complex_route, '/project/12345/status/23456')
     end
     it "should grant access to components by index" do
-      obj[0].should eql('project')
-      obj[1].should eql('12345')
-      obj[2].should eql('status')
-      obj[3].should eql('23456')
-      obj[4].should be_nil
+      expect(obj[0]).to eql('project')
+      expect(obj[1]).to eql('12345')
+      expect(obj[2]).to eql('status')
+      expect(obj[3]).to eql('23456')
+      expect(obj[4]).to be_nil
     end
     it "should grant access to path parameters by symbol" do
-      obj[:project_id].should eql('12345')
-      obj[:id].should eql('23456')
+      expect(obj[:project_id]).to eql('12345')
+      expect(obj[:id]).to eql('23456')
     end
   end
 

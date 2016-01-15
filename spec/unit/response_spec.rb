@@ -25,23 +25,23 @@ describe Restfulness::Response do
 
   describe "#initialize" do
     it "should assign request and headers" do
-      obj.request.should eql(request)
-      obj.headers.should eql({})
-      obj.status.should be_nil
-      obj.payload.should be_nil
+      expect(obj.request).to eql(request)
+      expect(obj.headers).to eql({})
+      expect(obj.status).to be_nil
+      expect(obj.payload).to be_nil
     end
   end
 
   describe "#run" do
     context "without route" do
       it "should not do anything" do
-        request.stub(:route).and_return(nil)
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:route).and_return(nil)
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         obj.run
-        obj.status.should eql(404)
-        obj.payload.should be_empty
-        obj.headers['Content-Type'].should be_nil
-        obj.headers['Content-Length'].should be_nil
+        expect(obj.status).to eql(404)
+        expect(obj.payload).to be_empty
+        expect(obj.headers['Content-Type']).to be_nil
+        expect(obj.headers['Content-Length']).to be_nil
       end
     end
     context "with route" do
@@ -50,46 +50,46 @@ describe Restfulness::Response do
       end
 
       it "should try to build resource and run it" do
-        request.stub(:route).and_return(route)
+        allow(request).to receive(:route).and_return(route)
         request.action = :get
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
-        resource.should_receive(:check_callbacks)
-        resource.should_receive(:call).and_return({:foo => 'bar'})
-        route.stub(:build_resource).and_return(resource)
+        expect(resource).to receive(:check_callbacks)
+        expect(resource).to receive(:call).and_return({:foo => 'bar'})
+        allow(route).to receive(:build_resource).and_return(resource)
         obj.run 
-        obj.status.should eql(200)
+        expect(obj.status).to eql(200)
         str = "{\"foo\":\"bar\"}"
-        obj.payload.should eql(str)
-        obj.headers['Content-Type'].should match(/application\/json/)
-        obj.headers['Content-Length'].should eql(str.bytesize.to_s)
+        expect(obj.payload).to eql(str)
+        expect(obj.headers['Content-Type']).to match(/application\/json/)
+        expect(obj.headers['Content-Length']).to eql(str.bytesize.to_s)
       end
 
       it "should call resource and set 204 result if no content" do
-        request.stub(:route).and_return(route)
+        allow(request).to receive(:route).and_return(route)
         request.action = :get
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
-        resource.should_receive(:check_callbacks)
-        resource.should_receive(:call).and_return(nil)
-        route.stub(:build_resource).and_return(resource)
+        expect(resource).to receive(:check_callbacks)
+        expect(resource).to receive(:call).and_return(nil)
+        allow(route).to receive(:build_resource).and_return(resource)
         obj.run
-        obj.status.should eql(204)
-        obj.headers['Content-Type'].should be_nil
-        obj.headers['Content-Length'].should be_nil
+        expect(obj.status).to eql(204)
+        expect(obj.headers['Content-Type']).to be_nil
+        expect(obj.headers['Content-Length']).to be_nil
       end
 
       it "should set string content type if payload is a string" do
-        request.stub(:route).and_return(route)
+        allow(request).to receive(:route).and_return(route)
         request.action = :get
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
-        resource.should_receive(:check_callbacks)
-        resource.should_receive(:call).and_return("This is a text message")
-        route.stub(:build_resource).and_return(resource)
+        expect(resource).to receive(:check_callbacks)
+        expect(resource).to receive(:call).and_return("This is a text message")
+        allow(route).to receive(:build_resource).and_return(resource)
         obj.run
-        obj.status.should eql(200)
-        obj.headers['Content-Type'].should match(/text\/plain/)
+        expect(obj.status).to eql(200)
+        expect(obj.headers['Content-Type']).to match(/text\/plain/)
       end
     end
 
@@ -99,50 +99,50 @@ describe Restfulness::Response do
       end
 
       it "should update the status and payload" do
-        request.stub(:route).and_return(route)
+        allow(request).to receive(:route).and_return(route)
         request.action = :get
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         txt = "This is a text error"
-        resource.stub(:check_callbacks) do
+        allow(resource).to receive(:check_callbacks) do
           raise Restfulness::HTTPException.new(418, txt)
         end
-        route.stub(:build_resource).and_return(resource)
+        allow(route).to receive(:build_resource).and_return(resource)
         obj.run
-        obj.status.should eql(418)
-        obj.headers['Content-Type'].should match(/text\/plain/)
-        obj.payload.should eql(txt)
+        expect(obj.status).to eql(418)
+        expect(obj.headers['Content-Type']).to match(/text\/plain/)
+        expect(obj.payload).to eql(txt)
       end
 
       it "should update the status and provide JSON payload" do
-        request.stub(:route).and_return(route)
+        allow(request).to receive(:route).and_return(route)
         request.action = :get
-        request.stub(:uri).and_return(URI('http://test.com/test'))
+        allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
         resource = double(:Resource)
         err = {:error => "This is a text error"}
-        resource.stub(:check_callbacks) do
+        allow(resource).to receive(:check_callbacks) do
           raise Restfulness::HTTPException.new(418, err)
         end
-        route.stub(:build_resource).and_return(resource)
+        allow(route).to receive(:build_resource).and_return(resource)
         obj.run
-        obj.status.should eql(418)
-        obj.headers['Content-Type'].should match(/application\/json/)
-        obj.payload.should eql(err.to_json)
+        expect(obj.status).to eql(418)
+        expect(obj.headers['Content-Type']).to match(/application\/json/)
+        expect(obj.payload).to eql(err.to_json)
       end
 
       context "for non http errors" do
 
         it "should catch error and provide result" do
-          request.stub(:route).and_return(route)
+          allow(request).to receive(:route).and_return(route)
           request.action = :get
-          request.stub(:uri).and_return(URI('http://test.com/test'))
+          allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
           resource = double(:Resource)
-          resource.stub(:check_callbacks) do
+          allow(resource).to receive(:check_callbacks) do
             raise SyntaxError, 'Bad writing'
           end
-          route.stub(:build_resource).and_return(resource)
+          allow(route).to receive(:build_resource).and_return(resource)
           obj.run
-          obj.status.should eql(500)
+          expect(obj.status).to eql(500)
         end
 
       end
