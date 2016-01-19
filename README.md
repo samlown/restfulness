@@ -671,7 +671,7 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
-### 0.3.3 - Pending
+### 0.3.3 - January 19, 2016
 
  * Basic support for handling large request bodies received as Tempfile (@lauramorillo)
  * Providing human readable payload for invalid JSON.
