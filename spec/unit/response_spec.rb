@@ -32,6 +32,25 @@ describe Restfulness::Response do
     end
   end
 
+  describe "#status=" do
+    it "should allow status to be forced" do
+      obj.status = 204
+      expect(obj.status).to eql(204)
+    end
+    it "should convert non-integer status to integer" do
+      obj.status = "203"
+      expect(obj.status).to eql(203)
+    end
+    it "should not overwrite on execution" do
+      route = app.router.routes.first
+      allow(request).to receive(:route).and_return(route)
+      allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
+      obj.status = 205
+      obj.run
+      expect(obj.status).to eql(205)
+    end
+  end
+
   describe "#run" do
     context "without route" do
       it "should not do anything" do

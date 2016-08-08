@@ -6,10 +6,20 @@ module Restfulness
     # resources.
     module Events
 
+      SUCCESS_EVENTS = [
+        [200, :ok],
+        [201, :created],
+        [202, :accepted],
+        [203, :non_authoritative],
+        [203, :non_authoritative_information],
+        [204, :no_content],
+        [205, :reset_content]
+      ]
+
       # Event definitions go here. We only support a limited subset
       # so that we don't end up with loads of methods that are not used.
       # If you'd like to see another, please send us a pull request!
-      SUPPORTED_EVENTS = [
+      EXCEPTION_EVENTS = [
         # 300 Events
         [304, :not_modified],
 
@@ -31,11 +41,18 @@ module Restfulness
         raise HTTPException.new(code, payload, opts)
       end
 
-      SUPPORTED_EVENTS.each do |row|
+      EXCEPTION_EVENTS.each do |row|
         define_method("#{row[1]}!") do |*args|
           payload = args.shift || ""
           opts    = args.shift || {}
           error!(row[0], payload, opts)
+        end
+      end
+
+      SUCCESS_EVENTS.each do |row|
+        define_method("#{row[1]}") do |*args|
+          response.status = row[0]
+          return args.first
         end
       end
 

@@ -414,11 +414,36 @@ By default, any parameter with key prefix `password` will be sanitized in the lo
 Restfulness.sensitive_params = [:password, :secretkey]
 ```
 
-## Error Handling
+## Status Code and Error Handling
 
-If you'd like your application to return anything other than a 200 (or 202) status, you have a couple of options that allow you to send codes back to the client.
+If you'd like your application to return anything other than a 200 status (or 204 for an empty payload), you can set it directly on the response object:
 
-One of the easiest approaches is to update the `response` code. Take the following example where we set a 403 response and the model's errors object in the payload:
+```ruby
+class ProjectResource < Restfulness::Resource
+  def get
+    response.status = 203
+    project
+  end
+end
+```
+
+The recommended approach in Restfulness however is to use the success status code helpers, for example:
+
+```ruby
+class ProjectResource < Restfulness::Resource
+  def get
+    non_authoritative(project) # Respond with 203
+  end
+  def put
+    build_project
+    created(project) # Respond with 201
+  end
+end
+```
+
+Any payload passed into the helper will be returned after setting the code.
+
+Dealing with error responses (3XX, or 4XX codes) can also be dealt with using the `response` object. Take the following example where we set a 403 response and the model's errors object in the payload:
 
 ```ruby
 class ProjectResource < Restfulness::Resource
@@ -433,7 +458,7 @@ class ProjectResource < Restfulness::Resource
 end
 ```
 
-The favourite method in Restfulness however is to use the `HTTPException` class and helper methods that will raise the error for you. For example:
+Continuing from the recommended approach for success helpers, Restfulness provides a `HTTPException` class and "bang" helper methods that will raise the error for you. For example:
 
 ```ruby
 class ProjectResource < Restfulness::Resource
@@ -446,7 +471,7 @@ class ProjectResource < Restfulness::Resource
 end
 ```
 
-The `forbidden!` bang method will call the `error!` method, which in turn will raise an `HTTPException` with the appropriate status code. Exceptions are permitted to include a payload also, so you could override the `error!` method if you wished with code that will automatically re-format the payload. Another example:
+The `forbidden!` bang method will call the `error!` method, which in turn will raise an `HTTPException` containing the appropriate status code. Exceptions are permitted to include a payload also, so you can override the `error!` method if you wished with code that will automatically re-format the payload. Another example:
 
 ```ruby
 # Regular resource
@@ -478,7 +503,17 @@ end
 
 This can be a really nice way to mold your errors into a standard format. All HTTP exceptions generated inside resources will pass through `error!`, even those that a triggered by a callback. It gives a great way to provide your own JSON error payload, or even just resort to a simple string.
 
-The currently built in exception methods are:
+The current built in success methods are:
+
+ * `ok` - code 200, the default.
+ * `created` - code 201.
+ * `accepted` - code 202.
+ * `non_authoritative_information` - code 203.
+ * `non_authoritative` - code 203, same as previous, but a shorter method name.
+ * `no_content` - code 204, default when no payload provided.
+ * `reset_content` - code 205.
+
+The current built in exception methods are:
 
  * `not_modified!`
  * `bad_request!`
@@ -670,6 +705,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
  * Support for before and after filters in resources, although I'm slightly apprehensive about this.
 
 ## History
+
+### 0.3.4 - August 8, 2016
+
+ * Added helper methods for success responses (@samlown)
 
 ### 0.3.3 - January 19, 2016
 

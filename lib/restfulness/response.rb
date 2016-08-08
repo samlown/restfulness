@@ -52,6 +52,11 @@ module Restfulness
       payload.to_s.bytesize.to_s
     end
 
+    # Override the status of this response.
+    def status=(code)
+      @status = code.to_i
+    end
+
     protected
 
     def resource=(obj)
@@ -59,12 +64,8 @@ module Restfulness
     end
 
     def update_status_and_payload(status, payload = "")
-      self.status  = status
+      self.status  = status unless self.status.present?
       self.payload = payload
-    end
-
-    def status=(code)
-      @status = code
     end
 
     def payload=(body)
