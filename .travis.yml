@@ -2,9 +2,11 @@ language: ruby
 rvm:
   - 2.3.0
   - 2.2.2
-  - 2.1.5
+  - 2.1.10
   - 2.0.0
   - jruby-19mode # JRuby in 1.9 mode
   - rbx
 before_install:
   - gem install bundler
+env:
+  - JRUBY_OPTS=--2.0
