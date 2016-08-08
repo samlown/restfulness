@@ -6,7 +6,7 @@ module Restfulness
       def authorization
         @authorization ||= begin
           payload = authorization_header_payload
-          AuthorizationHeader.new(payload) unless payload.nil?
+          AuthorizationHeader.new(payload) unless payload.blank?
         end
       end
 
@@ -15,8 +15,6 @@ module Restfulness
       def authorization_header_payload
         headers[:authorization]
       end
-
     end
-
   end
 end
