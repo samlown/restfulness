@@ -14,8 +14,13 @@ describe Restfulness::Requests::Authorization do
   end
 
   describe "#authorization" do
-
     it "should be nil if no authorization header resent" do
+      auth = request.authorization
+      expect(auth).to be_nil
+    end
+
+    it "should be nil if authorization header is blank" do
+      request.headers[:authorization] = ""
       auth = request.authorization
       expect(auth).to be_nil
     end
@@ -26,7 +31,5 @@ describe Restfulness::Requests::Authorization do
       expect(auth).to be_a(Restfulness::Requests::AuthorizationHeader)
       expect(auth.schema).to eql("Basic")
     end
-
- end
-
+  end
 end
