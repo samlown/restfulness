@@ -9,7 +9,7 @@ describe Restfulness::Request do
       end
     end
   end
-  
+
   let :klass do
     Restfulness::Request
   end
@@ -28,8 +28,8 @@ describe Restfulness::Request do
   class EmptyIO
     def read(count = nil, buffer = nil); ""; end
   end
-    
-  
+
+
   describe "#initialize" do
     it "should prepare basic objects" do
       expect(obj.action).to be_nil
@@ -235,6 +235,14 @@ describe Restfulness::Request do
       obj.body = EmptyIO.new()
       expect(obj.body).to receive(:read)
       expect(obj.params).to be_empty
+    end
+
+    it "should rewind IO body object when reading it" do
+      obj.headers[:content_type] = "application/x-www-form-urlencoded"
+      obj.body = StringIO.new("grant_type=password&username=johndoe&password=A3ddj3w")
+
+      expect(obj.params.keys).to eql(['grant_type', 'username', 'password'])
+      expect(obj.body.read).to eql('grant_type=password&username=johndoe&password=A3ddj3w')
     end
   end
 
