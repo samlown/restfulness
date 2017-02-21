@@ -706,6 +706,10 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
+### 0.3.5 - February 21, 2017
+
+ * Rewind body after reading (@pacoguzman)
+
 ### 0.3.4 - August 8, 2016
 
  * Added helper methods for success responses (@samlown)
