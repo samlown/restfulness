@@ -110,7 +110,9 @@ module Restfulness
       unless body.nil?
         # Sometimes the body can be a StringIO, Tempfile, or some other freakish IO.
         if body.respond_to?(:read)
-          body.read
+          read_body = body.read
+          body.rewind if body.respond_to?(:rewind)
+          read_body
         else
           body
         end
