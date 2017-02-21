@@ -18,7 +18,7 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
-  spec.add_dependency "rack", "~> 1.5.0"
+  spec.add_dependency "rack", ">= 1.5", "< 2.1"
   spec.add_dependency "multi_json", "~> 1.8"
   spec.add_dependency "activesupport", ">= 4.0", "< 6.0"
   spec.add_dependency "http_accept_language", "~> 2.0"

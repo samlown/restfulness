@@ -709,6 +709,8 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 ### 0.3.5 - February 21, 2017
 
  * Rewind body after reading (@pacoguzman)
+ * Ensuring Rack compatibility from 1.5.0 through 2.0.1 (@samlown)
+ * Giving up on ensuring Travis works with jruby and rbx, sorry (@samlown)
 
 ### 0.3.4 - August 8, 2016
 

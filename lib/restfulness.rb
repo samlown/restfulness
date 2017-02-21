@@ -5,10 +5,7 @@ require 'active_support'
 require 'active_support/core_ext'
 require 'active_support/dependencies'
 require 'active_support/logger'
-require 'rack/utils'
-require 'rack/commonlogger'
-require 'rack/showexceptions'
-require 'rack/builder'
+require 'rack'
 
 require 'http_accept_language/parser'
 

@@ -20,4 +20,4 @@ matrix:
     - rvm: 2.1.10
       gemfile: Gemfile.activesupport-5.x
     - rvm: jruby
-      gemfile: Gemfile.activesupport-5.x
+    - rvm: rbx
