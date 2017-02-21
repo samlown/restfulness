@@ -7,17 +7,20 @@ rvm:
   - 2.1.10
   - 2.2.4
   - 2.3.0
-  - jruby
   - rbx
 before_install:
   - gem install bundler
 env:
   - JRUBY_OPTS=--2.0
 matrix:
+  include:
+    # JRuby takes a lot more effort
+    - rvm: jruby-9.1.5.0
+      env: JRUBY_OPTS='--2.0'
+      gemfile: Gemfile.activesupport-4.x
   allow_failures:
     - rvm: 2.0.0
       gemfile: Gemfile.activesupport-5.x
     - rvm: 2.1.10
       gemfile: Gemfile.activesupport-5.x
-    - rvm: jruby
     - rvm: rbx
