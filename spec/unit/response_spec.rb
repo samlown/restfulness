@@ -4,6 +4,9 @@ require 'spec_helper'
 describe Restfulness::Response do
 
   class ResponseResource < Restfulness::Resource
+    def get
+      ""
+    end
   end
 
   let :klass do
@@ -168,6 +171,83 @@ describe Restfulness::Response do
 
     end
 
+  end
+
+  describe "content type handling" do
+    before :each do
+      request.uri = "http://localhost:3000/project"
+      request.action = :get
+    end
+    context "nil content" do
+      it "should not set content headers" do
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return(nil)
+        obj.run
+        expect(obj.headers['Content-Type']).to be_nil
+      end
+    end
+    context "empty content" do
+      it "should not set content headers" do
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return("")
+        obj.run
+        expect(obj.headers['Content-Type']).to be_nil
+      end
+    end
+    context "json requested with content" do
+      let :accept do
+        Restfulness::Headers::Accept.new("application/json")
+      end
+      it "should set json content headers" do
+        allow(request).to receive(:accept).and_return(accept)
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"})
+        obj.run
+        expect(obj.headers['Content-Type']).to match(/application\/json/)
+      end
+    end
+    context "xml requested with content" do
+      let :accept do
+        Restfulness::Headers::Accept.new("application/xml")
+      end
+      it "should set xml content headers" do
+        allow(request).to receive(:accept).and_return(accept)
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"})
+        obj.run
+        expect(obj.headers['Content-Type']).to match(/application\/xml/)
+        expect(obj.payload).to match("<?xml version=\"1.0\"")
+      end
+      it "should set xml content headers even if string provided by resource" do
+        allow(request).to receive(:accept).and_return(accept)
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"}.to_xml.to_s)
+        obj.run
+        expect(obj.headers['Content-Type']).to match(/application\/xml/)
+        expect(obj.payload).to match("<?xml version=\"1.0\"")
+      end
+    end
+    context "string requested with content" do
+      let :accept do
+        Restfulness::Headers::Accept.new("text/plain")
+      end
+      it "should set xml content headers" do
+        allow(request).to receive(:accept).and_return(accept)
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"}.to_s)
+        obj.run
+        expect(obj.headers['Content-Type']).to match("text/plain")
+      end
+    end
+    context "default with content" do
+      it "should set json content headers" do
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"})
+        obj.run
+        expect(obj.headers['Content-Type']).to match(/application\/json/)
+      end
+    end
+    context "overriding" do
+      it "should allow the content type to be overriden" do
+        obj.headers['Content-Type'] = 'application/foo'
+        allow_any_instance_of(ResponseResource).to receive(:get).and_return({foo: "bar"})
+        obj.run
+        expect(obj.headers['Content-Type']).to match("application/foo")
+      end
+    end
   end
 
 end

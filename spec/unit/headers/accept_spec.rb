@@ -61,9 +61,20 @@ describe Restfulness::Headers::Accept do
       obj = klass.new("text/plain, application/xml; version=1, text/*")
       expect(obj.xml?).to be true
     end
-    it "should confirm if json not accepted" do
+    it "should confirm if xml not accepted" do
       obj = klass.new("text/plain, application/json, text/*")
       expect(obj.xml?).to be false
+    end
+  end
+
+  describe "#text?" do
+    it "should confirm if content includes text" do
+      obj = klass.new("text/plain, text/*")
+      expect(obj.text?).to be true
+    end
+    it "should confirm if text not accepted" do
+      obj = klass.new("application/json")
+      expect(obj.text?).to be false
     end
   end
 
