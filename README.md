@@ -698,15 +698,14 @@ The project is now awesome, thanks to contributions by:
 
 Restfulness is still a work in progress but at Cabify we are using it in production. Here is a list of things that we'd like to improve or fix:
 
- * Support for more serializers and content types, not just JSON.
+ * More generic support for custom serializers and content types.
  * Support path methods for automatic URL generation.
  * Support redirect exceptions.
  * Needs more functional testing.
- * Support for before and after filters in resources, although I'm slightly apprehensive about this.
 
 ## History
 
-### 0.3.6 - pending
+### 0.3.6 - June 14, 2017
 
  * Fixing issue for overriding response Content-Type headers (@samlown)
  * Adding basic support for XML responses if requested in Accept headers (@samlown)
