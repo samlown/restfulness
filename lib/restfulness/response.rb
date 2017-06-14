@@ -69,21 +69,49 @@ module Restfulness
     end
 
     def payload=(body)
-      if body.nil? || body.is_a?(String)
-        @payload = body.to_s
-        update_content_headers(:text) unless @payload.empty?
+      type = content_type_from_accept_header
+      if body.nil?
+        @payload = ""
+      elsif body.is_a?(String)
+        # Implies that the body was already prepared, and we should rely on accept headers or assume text
+        @payload = body
+        update_content_headers(type || :text) unless @payload.empty?
+      elsif type && type == :xml
+        # Try to use a #to_xml if available, or just use to_s.
+        @payload = (body.respond_to?(:to_xml) ? body.to_xml : body).to_s
+        update_content_headers(:xml) unless @payload.empty?
       else
+        # DEFAULT: Assume we want JSON
         @payload = MultiJson.encode(body)
         update_content_headers(:json) unless @payload.empty?
       end
     end
     
+    def content_type_from_accept_header
+      accept = self.request.accept
+      if accept
+        if accept.json?
+          :json
+        elsif accept.xml?
+          :xml
+        elsif accept.text?
+          :text
+        end
+      else
+        nil
+      end
+    end
+
     def update_content_headers(type = :json)
-      case type
-      when :json
-        headers['Content-Type'] = 'application/json; charset=utf-8'
-      else # Assume text
-        headers['Content-Type'] = 'text/plain; charset=utf-8'
+      if headers['Content-Type'].to_s.empty?
+        case type
+        when :json
+          headers['Content-Type'] = 'application/json; charset=utf-8'
+        when :xml
+          headers['Content-Type'] = 'application/xml; charset=utf-8'
+        else # Assume text
+          headers['Content-Type'] = 'text/plain; charset=utf-8'
+        end
       end
       headers['Content-Length'] = content_length
     end

@@ -60,6 +60,13 @@ module Restfulness
         false
       end
 
+      def text?
+        media_types.each do |mt|
+          return true if mt.text?
+        end 
+        false
+      end
+
     end
 
   end

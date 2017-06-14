@@ -706,6 +706,11 @@ Restfulness is still a work in progress but at Cabify we are using it in product
 
 ## History
 
+### 0.3.6 - pending
+
+ * Fixing issue for overriding response Content-Type headers (@samlown)
+ * Adding basic support for XML responses if requested in Accept headers (@samlown)
+
 ### 0.3.5 - February 21, 2017
 
  * Rewind body after reading (@pacoguzman)
