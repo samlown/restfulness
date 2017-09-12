@@ -21,7 +21,7 @@ Here's a code example of what the restfulness side of a rack application might l
 
 ```ruby
 # The API definition, this matches incoming request paths to resources
-class TwitterAPI < Restfullness::Application
+class TwitterAPI < Restfulness::Application
   routes do
     scope 'api' do
       add 'task',      Tasks::ItemResource
