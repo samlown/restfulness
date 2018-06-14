@@ -1,6 +1,6 @@
 source "http://rubygems.org"
 
-gem "byebug"
+gem "byebug", platform: :mri
 
 gemspec
 
