@@ -124,7 +124,7 @@ describe Restfulness::Response do
         allow(request).to receive(:route).and_return(route)
         request.action = :get
         allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
-        resource = double(:Resource)
+        resource = double(:Resource, rescue_with_handler: nil)
         txt = "This is a text error"
         allow(resource).to receive(:check_callbacks) do
           raise Restfulness::HTTPException.new(418, txt)
@@ -140,7 +140,7 @@ describe Restfulness::Response do
         allow(request).to receive(:route).and_return(route)
         request.action = :get
         allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
-        resource = double(:Resource)
+        resource = double(:Resource, rescue_with_handler: nil)
         err = {:error => "This is a text error"}
         allow(resource).to receive(:check_callbacks) do
           raise Restfulness::HTTPException.new(418, err)
@@ -158,7 +158,7 @@ describe Restfulness::Response do
           allow(request).to receive(:route).and_return(route)
           request.action = :get
           allow(request).to receive(:uri).and_return(URI('http://test.com/test'))
-          resource = double(:Resource)
+          resource = double(:Resource, rescue_with_handler: nil)
           allow(resource).to receive(:check_callbacks) do
             raise SyntaxError, 'Bad writing'
           end
@@ -168,6 +168,26 @@ describe Restfulness::Response do
           expect(obj.payload).to eql("Bad writing\n")
         end
 
+      end
+
+      context "when use rescue_from at resource level" do
+        before do
+          ResponseResource.rescue_from StandardError do |exception|
+            error!(500, { message: 'Internal Server Error' }, {headers: {'X-id' => 'foo'}})
+          end
+          request.uri = "/project"
+          request.action = :get
+        end
+
+        it "should populat status and payload as demanded" do
+          allow_any_instance_of(ResponseResource).to receive(:send).with(:get).and_raise(RuntimeError, "foo")
+
+          obj.run
+
+          expect(obj.status).to eq(500)
+          expect(obj.payload).to eq("{\"message\":\"Internal Server Error\"}")
+          expect(obj.headers).to eq({"X-id" => "foo", "Content-Type" => "application/json; charset=utf-8", "Content-Length" => "35"})
+        end
       end
 
     end

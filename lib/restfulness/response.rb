@@ -1,6 +1,5 @@
 require "active_support/rescuable"
 
-
 module Restfulness
 
   class Response

@@ -1,8 +1,11 @@
+require "active_support/rescuable"
+
 module Restfulness
 
   class Resource
     include Resources::Events
     include Resources::Authentication
+    include ActiveSupport::Rescuable
 
     attr_reader :request, :response
 
@@ -15,7 +18,7 @@ module Restfulness
     def options
       response.headers['Allow'] = self.class.supported_methods.map{ |m|
         m.to_s.upcase
-      }.join(', ') 
+      }.join(', ')
       nil
     end
 
@@ -23,6 +26,8 @@ module Restfulness
       # At some point, we might add custom callbacks here. If you really need them though,
       # you can wrap around the call method easily.
       send(request.action)
+    rescue Exception => e
+      rescue_with_handler(e) || raise
     end
 
     # Callbacks

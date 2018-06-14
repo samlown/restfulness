@@ -190,7 +190,7 @@ describe Restfulness::Resource do
           obj.check_callbacks
         }.to_not raise_error
       end
-      
+
       it "should not be called unless action is :get or :head" do
         expect(obj).not_to receive(:etag)
         request.headers[:if_none_match] = 'sometag'
