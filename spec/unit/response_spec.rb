@@ -79,7 +79,7 @@ describe Restfulness::Response do
         expect(resource).to receive(:check_callbacks)
         expect(resource).to receive(:call).and_return({:foo => 'bar'})
         allow(route).to receive(:build_resource).and_return(resource)
-        obj.run 
+        obj.run
         expect(obj.status).to eql(200)
         str = "{\"foo\":\"bar\"}"
         expect(obj.payload).to eql(str)
@@ -165,6 +165,7 @@ describe Restfulness::Response do
           allow(route).to receive(:build_resource).and_return(resource)
           obj.run
           expect(obj.status).to eql(500)
+          expect(obj.payload).to eql("Bad writing\n")
         end
 
       end

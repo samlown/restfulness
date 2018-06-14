@@ -1,7 +1,22 @@
+require "active_support/rescuable"
+
 
 module Restfulness
 
   class Response
+    include ActiveSupport::Rescuable
+
+    # rescue are retrieved on reverse order
+
+    rescue_from StandardError, LoadError, SyntaxError  do |exception|
+      log_exception(exception)
+      update_status_and_payload(500, exception.message + "\n")
+    end
+
+    rescue_from HTTPException do |exception|
+      headers.update(exception.headers)
+      update_status_and_payload(exception.status, exception.payload)
+    end
 
     # Incoming data
     attr_reader :request
@@ -34,16 +49,8 @@ module Restfulness
       else
         update_status_and_payload(404)
       end
-
-    rescue HTTPException => e # Deal with HTTP exceptions
-      headers.update(e.headers)
-      update_status_and_payload(e.status, e.payload)
-
-    rescue StandardError, LoadError, SyntaxError => e
-      # Useful coding error handling, with backtrace
-      log_exception(e)
-      update_status_and_payload(500, e.message + "\n")
-
+    rescue Exception => e
+      rescue_with_handler(e)
     ensure
       log! if status
     end
@@ -86,7 +93,7 @@ module Restfulness
         update_content_headers(:json) unless @payload.empty?
       end
     end
-    
+
     def content_type_from_accept_header
       accept = self.request.accept
       if accept
@@ -143,6 +150,15 @@ module Restfulness
       string = "#{e.class}: #{e.message}\n"
       string << e.backtrace.map { |l| "\t#{l}" }.join("\n")
       Restfulness.logger.error(string)
+    end
+
+    def rescue_with_handler(exception)
+      if (exception.respond_to?(:original_exception) &&
+        (orig_exception = exception.original_exception) &&
+        handler_for_rescue(orig_exception))
+        exception = orig_exception
+      end
+      super(exception)
     end
 
   end
