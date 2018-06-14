@@ -172,14 +172,14 @@ describe Restfulness::Response do
 
       context "when use rescue_from at resource level" do
         before do
-          ResponseResource.rescue_from StandardError do |exception|
+          ResponseResource.rescue_from RuntimeError do |exception|
             error!(500, { message: 'Internal Server Error' }, {headers: {'X-id' => 'foo'}})
           end
           request.uri = "/project"
           request.action = :get
         end
 
-        it "should populat status and payload as demanded" do
+        it "should populate status and payload as demanded" do
           allow_any_instance_of(ResponseResource).to receive(:send).with(:get).and_raise(RuntimeError, "foo")
 
           obj.run
@@ -187,6 +187,16 @@ describe Restfulness::Response do
           expect(obj.status).to eq(500)
           expect(obj.payload).to eq("{\"message\":\"Internal Server Error\"}")
           expect(obj.headers).to eq({"X-id" => "foo", "Content-Type" => "application/json; charset=utf-8", "Content-Length" => "35"})
+        end
+
+        it "should be handle by the response if not handled by the resource" do
+          allow_any_instance_of(ResponseResource).to receive(:send).with(:get).and_raise(StandardError, "foo")
+
+          obj.run
+
+          expect(obj.status).to eq(500)
+          expect(obj.payload).to eq("foo\n")
+          expect(obj.headers).to eq({"Content-Type" => "text/plain; charset=utf-8", "Content-Length" => "4"})
         end
       end
 

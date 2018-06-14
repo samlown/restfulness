@@ -26,7 +26,7 @@ module Restfulness
       # At some point, we might add custom callbacks here. If you really need them though,
       # you can wrap around the call method easily.
       send(request.action)
-    rescue Exception => e
+    rescue StandardError => e
       rescue_with_handler(e) || raise
     end
 
