@@ -3,6 +3,11 @@ require 'rubygems'
 require 'bundler/setup'
 
 require 'restfulness' # and any other gems you need
+begin
+  require 'byebug'
+rescue LoadError
+  puts 'If you need some debugging take care of it'
+end
 
 RSpec.configure do |config|
   config.color = true
