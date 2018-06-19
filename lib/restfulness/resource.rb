@@ -27,6 +27,7 @@ module Restfulness
       # you can wrap around the call method easily.
       send(request.action)
     rescue StandardError => e
+      raise if e.is_a?(HTTPException) # Managed on Response lifecycle
       rescue_with_handler(e) || raise
     end
 
